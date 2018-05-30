@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Perun Network</title>
+    <meta name="description" content="Perun virtual payment and state channels">
+    <meta name="keywords" content="Perun virtual payment and state channels ethereum smart contracts">
+    
+    <link rel="stylesheet" href="css/styles-merged.css">
+    <link rel="stylesheet" href="css/style.min.css">
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+
+    <!--[if lt IE 9]>
+      <script src="js/vendor/html5shiv.min.js"></script>
+      <script src="js/vendor/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default probootstrap-navbar">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="index.html" title="uiCookies:Frame">PERUN</a>
+        </div>
+
+        <div id="navbar-collapse" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li class="active"><a href="#" data-nav-section="home">Home</a></li>
+            <li><a href="#" data-nav-section="features">Features</a></li>
+            <li><a href="#" data-nav-section="pricing">Pricing</a></li>
+            <li><a href="#" data-nav-section="reviews">Reviews</a></li>
+            <li><a href="#" data-nav-section="contact">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <section class="probootstrap-hero prohttp://localhost/probootstrap/frame/#featuresbootstrap-slant" style="background-image: url(img/image_2.jpg);" data-section="home" data-stellar-background-ratio="0.5">
+      <div class="container">
+        <div class="row intro-text">
+          <div class="col-md-8 col-md-offset-2 text-center">
+            <h1 class="probootstrap-heading probootstrap-animate">Virtual Payment and State Channels</h1>
+            <div class="probootstrap-subheading center">
+
+              <p class="probootstrap-animate"><a href="https://drive.google.com/file/d/1phBzFXt2QDEemh0JIOAI80nibe3JTRu5/view" target="_blank" role="button" class="btn btn-primary">Non technical summary</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="probootstrap-section" id="nontech" data-section="nontech">
+      <div class="container">
+        <div class="row text-center mb100">
+          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+            <h2 class="mb30 text-black probootstrap-heading">Non-technical description</h2>
+            <p>Perun network is a system of payment and state channels over Ethereum. Perun's channels can be virtual, which means that the payments over longer chains of channels do not require interaction with the intermediate parties.
+            The following document contains a non-technical introduction to the Perun network:</p>
+            <p class="probootstrap-animate"><a href="https://drive.google.com/file/d/1phBzFXt2QDEemh0JIOAI80nibe3JTRu5/view" target="_blank" role="button" class="btn btn-primary">View PDF</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="probootstrap-section probootstrap-bg-light" id="tech" data-section="tech">
+      <div class="container">
+        <div class="row text-center mb100">
+          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+            <h2 class="mb30 text-black probootstrap-heading">Technical Whitepapers</h2>
+          </div>
+        </div>
+        <!-- END row -->
+        <div class="row mb100">
+          <div class="col-md-3 col-md-pull-0 probootstrap-animate">
+            <p><img src="img/logo.png" alt="Perun logo" class="img-responsive"></p>
+          </div>
+          <div class="col-md-6 col-md-pull-0 probootstrap-section-heading">
+            <h3 class="text-primary probootstrap-heading-2">Virtual Payment Channels</h3>
+            <p><p>The following document contains a technical description of Perun's virtual payment channels of length 2.</p></p>
+            <p class="probootstrap-animate"><a href="http://eprint.iacr.org/2017/635" target="_blank" role="button" class="btn btn-primary">View PDF</a>
+            <h3 class="text-primary probootstrap-heading-2">State Channel Networks</h3>
+            <p><p>The following document contains a full specification of Perun's approach to state channel networks of arbitrary length supporting arbitrary complex contracts.</p></p>
+            <p class="probootstrap-animate"><a href="https://eprint.iacr.org/2018/320" target="_blank" role="button" class="btn btn-primary">View PDF</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="probootstrap-section" id="math" data-section="math">
+      <div class="container">
+        <div class="row text-center mb100">
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Highly scalable</h2>
+            <p>Perun is even more scalable compared to other off-chain solutions, since it eliminates the need for all middlemen in a channel network to acknowledge every transaction. This means all transactions within Perun are peer-to-peer without having to bother other parties in the network.</p>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Provable secure</h2>
+            <p>An important feature of Perun is that its protocols have been proven secure using the universal composability framework.</p>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Privacy preserving</h2>
+            <p>Since we eliminate the need for any middleman to acknowledge every transaction routed over them, a middleman can only see the balance of a virtual channel after the closing transaction. This prevents the third party to see when and how often money was exchanged over the virtual channel.</p>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Cost efficient</h2>
+            <p>Perun reduces the cost for executing smart contracts by a manyfold. We keep the transactions off-chain while simultaneously eliminating the fees needed to route transaction over a third party in the channel network.</p>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Lightweight</h2>
+            <p>Perun relies on common cryptographic primitves like cryptographic signature schemes. These are easy to compute, resulting in Perun being executable on almost every device.</p>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <h2 class="mb30 text-black probootstrap-heading">Flexible</h2>
+            <p>Perun supports generalized state channels, thus can be used to execute arbitrary smart contract off-chain. Since it's proven secured, it can be used whenever an authority exists. This authority can be a blockchain, a trusted party or even a bank.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="probootstrap-section probootstrap-bg-light" data-section="impl">
+      <div class="container">
+        <div class="row text-center mb100">
+          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+            <h2 class="mb30 text-black probootstrap-heading">Implementation</h2>
+            <p> Our implementation will be developed together with Bosch GmbH. 
+              The node software will be published as soon as it is ready. 
+              The repository contains a proof-of-concept implementation of Perun's virtual payment channels of length 2.
+            </p>
+            <p class="probootstrap-animate"><a href="https://github.com/PerunEthereum/Peru" target="_blank" role="button" class="btn btn-primary">Go to Github</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+     <section class="probootstrap-section" data-section="team">
+      <div class="container">
+        <div class="row text-center mb100">
+          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
+            <h2 class="mb30 text-black probootstrap-heading">Team</h2>
+            <p>Perun is currently an academic project developed jointly by the TU Darmstadt (Germany) and the University of Warsaw (Poland). It is party founded by the German Research Foundation and the Polish National Science Center.</p>
+          </div>
+        </div>
+        <!-- END row -->
+        <div class="row">
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="probootstrap-testimonial">
+              <p><img src="img/marius.jpg" class="img-responsive img-circle" alt="Marius van der Wijden"></p>
+              <h3 align="center">Marius van der Wijden</h3>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="probootstrap-testimonial">
+              <p><img src="img/sebastian.jpg" class="img-responsive img-circle" alt="Sebastian Faust"></p>
+              <h3 align="center">Dr. Sebastian Faust</h3>
+              <p>
+              </p>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="probootstrap-testimonial">
+              <p><img src="img/stefan.jpg" class="img-responsive img-circle" alt="Stefan Dziembowski"></p>
+              <h3 align="center">Dr. Stefan Dziembowski</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="probootstrap-footer">
+      <div class="container text-center">
+        <div class="row">
+          <div class="col-md-12">
+            <p class="probootstrap-social"><a href="#"><i class="icon-twitter"></i></a> <a href="#"><i class="icon-facebook2"></i></a> <a href="#"><i class="icon-instagram2"></i></a><a href="#"><i class="icon-linkedin"></i></a></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            &copy; 2017 <a href="https://uicookies.com/">uiCookies:Frame</a>. All Rights Reserved. <br> Designed &amp; Developed by <a href="https://uicookies.com">uicookies.com</a> <br> Demo Images by <a href="https://unsplash.com">Unsplash</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    
+
+    <script src="js/scripts.min.js"></script>
+    <script src="js/custom.js"></script>
+
+  </body>
+</html>
