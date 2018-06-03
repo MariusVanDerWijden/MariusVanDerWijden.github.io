@@ -52,7 +52,7 @@
             <h1 class="probootstrap-heading probootstrap-animate">Virtual Payment and State Channels</h1>
             <div class="probootstrap-subheading center">
 
-              <p class="probootstrap-animate"><a href="https://drive.google.com/file/d/1phBzFXt2QDEemh0JIOAI80nibe3JTRu5/view" target="_blank" role="button" class="btn btn-primary">Non technical summary</a>
+              <p class="probootstrap-animate"><a href="https://drive.google.com/file/d/1phBzFXt2QDEemh0JIOAI80nibe3JTRu5/view" target="_blank" role="button" class="btn btn-primary">Perun Features</a>
             </div>
           </div>
         </div>
@@ -63,9 +63,8 @@
       <div class="container">
         <div class="row text-center mb100">
           <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-            <h2 class="mb30 text-black probootstrap-heading">Non-technical description</h2>
-            <p>Perun network is a system of payment and state channels over Ethereum. Perun's channels can be virtual, which means that the payments over longer chains of channels do not require interaction with the intermediate parties.
-            The following document contains a non-technical introduction to the Perun network:</p>
+            <h2 class="mb30 text-black probootstrap-heading">Perun Network</h2>
+            <p>The Perun Network is a framework that supports off-chain protocols for simple payments and generic smart contract off-chain execution. Perun's channels can be virtual, which means that off-chain transactions  do not require interaction with intermediaries thereby further reducing trust, latency and costs. In additional Perun offers strong security guarantees backed up by  scientific methods from cryptographic research. For further details on Perun's features visit:</p>
             <p class="probootstrap-animate"><a href="https://drive.google.com/file/d/1phBzFXt2QDEemh0JIOAI80nibe3JTRu5/view" target="_blank" role="button" class="btn btn-primary">View PDF</a>
           </div>
         </div>
@@ -87,14 +86,14 @@
             </div>
             <div class="col-md-8 mx-auto probootstrap-section-heading">
               <h3 class="text-primary probootstrap-heading-2">Virtual Payment Channels</h3>
-              <p><p>The following document contains a technical description of Perun's virtual payment channels of length 2.</p></p>
+              <p><p>This whitepaper contains a technical description of Perun's virtual payment hubs with special optimizations for carrying out payments.</p></p>
               <p class="probootstrap-animate"><a href="http://eprint.iacr.org/2017/635" target="_blank" role="button" class="btn btn-primary">View PDF</a>
             </div>
           </div>
           <div class="row align-items-center col-lg-10 mx-auto">
             <div class="col-md-7 order-md-1 mb-4 text-right probootstrap-section-heading">
-              <h3 class="text-primary probootstrap-heading-2">State Channel Networks</h3>
-              <p><p>The following document contains a full specification of Perun's approach to state channel networks of arbitrary length supporting arbitrary complex contracts.</p></p>
+              <h3 class="text-primary probootstrap-heading-2">Generic State Channel Networks</h3>
+              <p><p>This whitepaper contains the first full specification of generic state channel networks that support an arbitrary number of intermediaries and allow users to run complex smart contract off-chain.</p></p>
               <p class="probootstrap-animate"><a href="https://eprint.iacr.org/2018/320" target="_blank" role="button" class="btn btn-primary">View PDF</a>
             </div>
             <div class="col-md-4 col-5 order-md-1 mb-md-0 mb-4 mx-auto probootstrap-animate">
@@ -110,27 +109,29 @@
         <div class="row text-center mb100">
           <div class="col-md-4 col-sm-6 col-xs-12">
             <h2 class="mb30 text-black probootstrap-heading">Highly scalable</h2>
-            <p>Perun is even more scalable compared to other off-chain solutions, since it eliminates the need for all middlemen in a channel network to acknowledge every transaction. This means all transactions within Perun are peer-to-peer without having to bother other parties in the network.</p>
+            <p>The Perun Network offers nearly unlimited scalability by moving the massive amount of transactions off-chain. In contrast to other off-chain solutions, Perun's virtual channels further improve scalability since intermediaries do not need to acknowledge transactions routed via them. Thereby, Perun's off-chain transactions are fully peer-to-peer without the need for involving other parties.</p>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <h2 class="mb30 text-black probootstrap-heading">Provable secure</h2>
-            <p>An important feature of Perun is that its protocols have been proven secure using the universal composability framework.</p>
+            <p>A distinctive feature of Perun is that its protocols have been mathematically proven secure using state-of-the-art techniques from cryptographic research.</p>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
-            <h2 class="mb30 text-black probootstrap-heading">Privacy preserving</h2>
-            <p>Since we eliminate the need for any middleman to acknowledge every transaction routed over them, a middleman can only see the balance of a virtual channel after the closing transaction. This prevents the third party to see when and how often money was exchanged over the virtual channel.</p>
+            <h2 class="mb30 text-black probootstrap-heading">Privacy enhancing</h2>
+            <p>Since Perun eliminates interaction with the middleman, Perun's channels naturally enhance privacy. Perun guarantees that only the parties that are necessary for an off-chain transaction are aware of the money that was exchanged.</p>
           </div>
+        </div>
+        <div class="row text-center mb100">
           <div class="col-md-4 col-sm-6 col-xs-12">
             <h2 class="mb30 text-black probootstrap-heading">Cost efficient</h2>
-            <p>Perun reduces the cost for executing smart contracts by a manyfold. We keep the transactions off-chain while simultaneously eliminating the fees needed to route transaction over a third party in the channel network.</p>
+            <p>Perun reduces the costs for executing smart contracts and payments. We keep transactions off-chain while simultaneously eliminating the fees needed to route transaction over intermediaries.</p>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <h2 class="mb30 text-black probootstrap-heading">Lightweight</h2>
-            <p>Perun relies on common cryptographic primitves like cryptographic signature schemes. These are easy to compute, resulting in Perun being executable on almost every device.</p>
+            <p>Perun relies on basic cryptographic primitives and for many applications only near-field communication is required due to our technique of channel virtualization. Hence, Perun can be used on almost any platform, e.g., for machine-to-machine communication on low-cost devices.</p>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <h2 class="mb30 text-black probootstrap-heading">Flexible</h2>
-            <p>Perun supports generalized state channels, thus can be used to execute arbitrary smart contract off-chain. Since it's proven secured, it can be used whenever an authority exists. This authority can be a blockchain, a trusted party or even a bank.</p>
+            <p>Perun supports generalized state channels, thus we can execute arbitrary smart contract off-chain. This enables completely new applications where simple payment channels are not sufficient.</p>
           </div>
         </div>
       </div>
@@ -141,10 +142,10 @@
       <div class="container">
         <div class="row text-center mb100">
           <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-            <h2 class="mb30 text-black probootstrap-heading">Implementation</h2>
-            <p> Our implementation will be developed together with Bosch GmbH. 
-              The node software will be published as soon as it is ready. 
-              The repository contains a proof-of-concept implementation of Perun's virtual payment channels of length 2.
+            <h2 class="mb30 text-black probootstrap-heading">Open Source Implementation</h2>
+            <p> An open source implementation of Perun is developed in cooperation with Robert Bosch GmbH. 
+              We plan to release first version of the node software for virtual payment hubs in Q3 2018.
+              The repository contains a proof-of-concept implementation of Perun's virtual payment hubs of length 2.
             </p>
             <p class="probootstrap-animate"><a href="https://github.com/PerunEthereum/Peru" target="_blank" role="button" class="btn btn-primary">Go to Github</a>
           </div>
@@ -166,35 +167,42 @@
             <div class="probootstrap-testimonial">
               <p><img src="img/marius.jpg" class="img-responsive img-circle" alt="Marius van der Wijden"></p>
               <h3 align="center">Marius van der Wijden</h3>
-              <h4 align="center">CEO</h4>
+              <h4 align="center">TU Darmstadt</h4>
             </div>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <div class="probootstrap-testimonial">
               <p><img src="img/sebastian.jpg" class="img-responsive img-circle" alt="Sebastian Faust"></p>
-              <h3 align="center">Prof. Dr. Sebastian Faust</h3>
-              <h4 align="center">Researcher</h4>
+              <h3 align="center">Prof. Sebastian Faust</h3>
+              <h4 align="center">TU Darmstadt</h4>
             </div>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <div class="probootstrap-testimonial">
               <p><img src="img/stefan.jpg" class="img-responsive img-circle" alt="Stefan Dziembowski"></p>
-              <h3 align="center">Prof. Dr. Stefan Dziembowski</h3>
-              <h4 align="center">Researcher</h4>
+              <h3 align="center">Prof. Stefan Dziembowski</h3>
+              <h4 align="center">University of Warsaw</h4>
+            </div>
+          </div>
+          <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="probootstrap-testimonial">
+              <p><img src="img/stefan.jpg" class="img-responsive img-circle" alt="Lisa Eckey"></p>
+              <h3 align="center">Sasan Safai</h3>
+              <h4 align="center">Universität Mannheim</h4>
             </div>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <div class="probootstrap-testimonial">
               <p><img src="img/stefan.jpg" class="img-responsive img-circle" alt="Lisa Eckey"></p>
               <h3 align="center">Lisa Eckey</h3>
-              <h4 align="center">Researcher</h4>
+              <h4 align="center">TU Darmstadt</h4>
             </div>
           </div>
           <div class="col-md-4 col-sm-6 col-xs-12">
             <div class="probootstrap-testimonial">
               <p><img src="img/stefan.jpg" class="img-responsive img-circle" alt="Kristina Hostakova"></p>
               <h3 align="center">Kristina Hostáková</h3>
-              <h4 align="center">Researcher</h4>
+              <h4 align="center">TU Darmstadt</h4>
             </div>
           </div>
         </div>
