@@ -1,135 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Marius van der Wijden</title>
-    <meta name="description" content="Marius van der Wijden">
-    <meta name="keywords" content="Marius van der Wijden Developer Homepage">
-    
-    <link rel="stylesheet" href="css/styles-merged.css">
-    <link rel="stylesheet" href="css/style.min.css">
-    <link rel="stylesheet" href="fonts/icomoon/style.css">
+---
+layout: default
+---
+{% assign posts_count = paginator.posts | size %}
 
-    <!--[if lt IE 9]>
-      <script src="js/vendor/html5shiv.min.js"></script>
-      <script src="js/vendor/respond.min.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    
-    <!-- Fixed navbar -->
-    <nav class="navbar navbar-default probootstrap-navbar">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="index.html" title="uiCookies:Frame">Marius van der Wijden</a>
+<div class="home">
+  {% if posts_count > 0 %}
+    <div class="posts">
+      {% for post in paginator.posts %}
+        <div class="post py3">
+          <p class="post-meta">
+	    {% if site.date_format %}
+	      {{ post.date | date: site.date_format }}
+	    {% else %}
+	      {{ post.date | date: "%b %-d, %Y" }}
+	    {% endif %}
+	  </p>
+          <a href="{{ post.url | relative_url }}" class="post-link"><h3 class="h1 post-title">{{ post.title }}</h3></a>
+          <span class="post-summary">
+            {% if post.summary %}
+              {{ post.summary }}
+            {% else %}
+              {{ post.excerpt }}
+            {% endif %}
+          </span>
         </div>
+      {% endfor %}
+    </div>
 
-        <div id="navbar-collapse" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li class="active"><a href="#" data-nav-section="home">Home</a></li>
-            <li><a href="#" data-nav-section="projects">Projects</a></li>
-            <li><a href="#" data-nav-section="talks">Talks</a></li>
-            <li><a href="#" data-nav-section="contact">Contact</a></li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    
-    <section class="probootstrap-hero prohttp://localhost/probootstrap/frame/#featuresbootstrap-slant" style="background-image: url(img/marius.jpg);" data-section="home" data-stellar-background-ratio="0.5">
-      <div class="container">
-        <div class="row ">
-            <div class="col-md-6 col-sm-2 col-xs-8 text-right">
-              <img src="img/marius.jpg" class="img-responsive img-rounded" alt="Marius van der Wijden">
-            </div>
-            <div class="col-md-6 col-sm-6 col-xs-8 text-black ">
-              <h1 class="probootstrap-heading probootstrap-animate">Marius van der Wijden</h1>
-            </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="probootstrap-section" id="projects" data-section="projects">
-      <div class="container">
-        <div class="row text-center mb100">
-          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-            <h2 class="mb30 text-black probootstrap-heading">Projects</h2>
-            <p>I've worked or am currently working on the following projects: <br><br>
-
-            Perun - Blockchain agnostic generalized State Channel Framework<br>
-            Ethminer - Open Source Ethereum Mining Software<br>
-            SM^2- Coin - A new cryptocurrency based on file storage <br>
-            ProgPoW - Proposal for a new Proof-of-Work algorithm for Ethereum<br>
-            GPUSnarks - Implementation of Fourier Transformation and Multi-Exponentiation on Graphics Cards<br>
-            Sourcy - Data marketplace for insider information<br>
-            Laika - Fork of Ethereum that uses a Proof-of-Capacity<br><br>
-
-            I also contributed to multiple other Open Source projects. 
-             <p class="probootstrap-animate"><a href="https://github.com/MariusVanDerWijden" target="_blank" role="button" class="btn btn-primary">Github</a>
-             </p>
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="probootstrap-section probootstrap-bg-light" id="conferences" data-section="conferences">
-      <div class="container">
-        <div class="row text-center mb100">
-          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-            <h2 class="mb30 text-black probootstrap-heading">Talks</h2>
-            <p>I gave the following public talks: <br><br>
-            June 16. 2018 - IoP Conference - SM^2-Coin: Green Decentralised Filehosting<br>
-            June 16. 2018 - IoP Conference - Perun: Payment and State Channels<br>
-            June 28. 2018 - Distribute Conference - Perun: Payment and State Channels<br>
-            February 23. 2019 - Make-Rhein-Main - Programming a Distributed Network <br>
-            March 8. 2019 - ETHCC - Sourcy: Making Non-attributable faults attributable (Lightning Talk)<br>
-            June 29. 2019 - Distribute Conference - ProgPoW: A new Proof-of-Work for Ethereum <br>
-            September 10. 2019 - Accelerator Frankfurt - Perun: Payment and State Channels <br> <br>
-
-            If you want to get access to the slide decks, you can send me an email at: <a href="mailto:m.vanderwijden@live.de">m.vanderwijden@live.de</a>  
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="probootstrap-section" id="contact" data-section="contact">
-      <div class="container">
-        <div class="row text-center mb100">
-          <div class="col-md-8 col-md-offset-2 probootstrap-section-heading">
-            <h2 class="mb30 text-black probootstrap-heading">Contact</h2>
-            <h3>
-             <a href="https://twitter.com/vdwijden">Twitter: @vdwijden</a> <br>
-             <a href="https://github.com/MariusVanDerWijden">Github: MariusVanDerWijden</a> <br>
-             <a href="https://www.linkedin.com/in/marius-van-der-wijden-5bba26173/"> LinkedIn: Marius van der Wijden</a> <br>
-            E-Mail: <a href="mailto:m.vanderwijden@live.de">m.vanderwijden@live.de</a> 
-            </h3>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="probootstrap-footer">
-      <div class="container text-center">
-        <div class="row">
-          <div class="col-md-12">
-            &copy; 2020 <a href="mariusvanderwijden.github.io">MariusVanDerWijden</a>. All Rights Reserved. <br>Template Designed &amp; Developed by <a href="https://uicookies.com">uicookies.com</a> 
-          </div>
-        </div>
-      </div>
-    </footer>
-
-    
-
-    <script src="js/scripts.min.js"></script>
-    <script src="js/custom.js"></script>
-
-  </body>
-</html>
+    {% include pagination.html %}
+  {% else %}
+    <h1 class='center'>{{ site.text.index.main }}</h1>
+  {% endif %}
+</div>

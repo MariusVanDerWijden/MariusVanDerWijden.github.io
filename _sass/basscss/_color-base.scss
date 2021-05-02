@@ -1,0 +1,29 @@
+/* Basscss Color Base */
+
+body {
+  color: $dark-gray;
+  background: rgb(255,255,235);
+  background: radial-gradient(circle, rgba(255,255,235,1) 37%, rgba(208,255,230,1) 56%, rgba(203,243,255,1) 82%, rgba(219,201,250,1) 100%);
+}
+
+a {
+  color: $blue;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+pre,
+code {
+  background-color: $lighter-gray;
+  border-radius: $border-radius;
+}
+
+hr {
+  border: 0;
+  border-bottom-style: solid;
+  border-bottom-width: $border-width;
+  border-bottom-color: $border-color;
+}
