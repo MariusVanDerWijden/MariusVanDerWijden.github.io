@@ -1,7 +1,7 @@
 remote_theme: johno/pixyll
 
 # Site settings
-title:       My Blog
+title:       MariusVanDerWijden
 author:      Marius van der Wijden
 description: "Blog on semi-cool ethereum stuff"
 url:         "https://mariusvanderwijden.github.io/"
