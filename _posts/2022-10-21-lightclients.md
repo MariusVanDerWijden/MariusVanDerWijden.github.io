@@ -1,7 +1,7 @@
 ---
 layout:        post
 title:         Ethereum's biggest issue no one's talking about
-date:          2021-11-07 20:00:00
+date:          2022-10-22 20:00:00
 summary:       Private orderflow and MEV is a deadly combination, but trustless light clients might be able solve it
 categories:    blog
 tags:          Private Orderflow, Ethereum, Lightclient, MEV
