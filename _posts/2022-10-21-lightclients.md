@@ -8,8 +8,8 @@ tags:          Private Orderflow, Ethereum, Lightclient, MEV
 ---
 
 We recently had a long workshop in Bogota with the Flashbots team and other Relay runners.
-Afterwards I started thinking a bit about how to get rid of flashbots and democratize MEV even further.
-One inital idea I had was to create a geth fork that could run bunch of basic MEV strategies (like arbitrage, liquidations, etc).
+Afterwards I started thinking a bit about how to get rid of Flashbots and democratize MEV even further.
+One initial idea I had was to create a geth fork that could run bunch of basic MEV strategies (like arbitrage, liquidations, etc).
 All the strategies would be open source under a very strict license s.th. interested developers could add their strategies and no one (at least not big companies) is able to modify the code and not upstream their contributions.
 This would bring back power to the validators. 
 
@@ -46,7 +46,21 @@ How does this relate to private orderflow?
 Given a strong and easy to use implementation of trustless light clients, we might see wallets moving away from defaulting to centralized RPC providers to running their own light clients in the background.
 Having an army of hundred thousands of light clients running on users computers (and maybe mobile phones) everywhere will make it way more difficult to capture the orderflow.
 
+There are however some more drawbacks to providing a geth fork that extracts the MEV directly for the validator other than private orderflow.
+Currently validators that don't use mev-boost use a priority gas auction to maximize their profit. 
+Transactions are ordered by gas price. 
+If the majority of validators extract MEV, it might impact the execution times of user transactions since high paying transactions are only considered if they pay more than the MEV that can be extracted from other transactions.
+This might negatively impact the UX of transactions sending plain ether, which usually have very little MEV attached.
+
+Another issue to consider is that ethereum slowly moves to proposer-builder separation (PBS).
+The idea of PBS is to split the validator and block producer role to make running a validator cheaper and easier.
+Since we *pay* validators to verify and produce blocks, I personally think it is reasonable to require them to do block production.
+But there's a discussion to be had, because increased state and history growth will lead to higher node requirements.
+Higher node requirements might lead to less homestakers and more people moving to staking pools since running a node becomes harder.
+
 In conclusion private orderflow is bad, because whomever controls the transactions can extract the most MEV and thus become a central player.
 We can fight private orderflow by sending more transactions directly to the public mempool by running our own nodes.
 If trustless light clients become usable and economic we will hopefully see wallets move away from centralized RPC providers.
 In order to enable trustless light clients we need verkle trees and a lot of engineering work.
+
+Big thanks to @lightclients for his feedback on this block post! 
