@@ -1,7 +1,7 @@
 ---
 layout:        post
 title:         Faster Block Propagation in Blockchain Networks
-date:          2023-07-15 20:00:00
+date:          2023-07-15 10:00:00
 summary:       Probabilistic Cut-Through Switching is a technique to improve block propagation in blockchain networks
 categories:    blog
 tags:          Blockchain, Ethereum, Networking
