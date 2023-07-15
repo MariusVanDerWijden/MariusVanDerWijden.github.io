@@ -25,14 +25,14 @@ During the conception of our own cryptocurrency SM²-Coin (6) we came across the
 In traditional computer networking two approaches to the relaying of packets exist. The basic mode, **store-and-forward** (3) works like following:
 Upon receiving a packet (block) the packet is checked for integrity before it is relayed to all connected nodes.
 
-![Store-and-Forward](store-and-forward.png)
+![Store-and-Forward](https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/store-and-forward.png)
 
 This method guarantees the integrity of every block, however every node has to check each block before forwarding it which increases the latency of each block. If an attacker publishes an invalid block, this block will not be forwarded by any honest node.
 
 ## Cut-Through Switching
 The second method is called **cut-through switching** (4). Hereby the packet (block) is forwarded without checking the integrity of the block. After forwarding the block, its integrity is checked and, if valid, processed.
 
-![Cut-Through Switching](cut-through.png)
+![Cut-Through Switching](https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/cut-through.png)
 
 This greatly decreases the time each block has to travel through the network. However this speedup comes with a price. Attackers can now spam the network with invalid blocks that get forwarded. Since creating these blocks is free (the pow is checked in the verification phase) a small set of attackers can DOS the entire network. There have been sub-networks of the bitcoin network that operate on the cut-through switching principle. (5)
 
@@ -40,7 +40,7 @@ This greatly decreases the time each block has to travel through the network. Ho
 
 We propose a new algorithm called **probabilistic cut-through switching**. The idea is that each node maintains a list of incoming connections. If a block arrives at the node, it checks (according to a metric) whether it should use store-and-forward or cut-through switching. If a peer is suspected to be an attacker (forwards to many invalid packages) the peer is dropped.
 
-![Probabilistic Cut-Through Switching](prob-cut-through.png)
+![Probabilistic Cut-Through Switching](https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/prob-cut-through.png)
 
 The network can switch to the fast cut-through switching if the network is not under attack and in the case of attacks switches back to the more robust store-and-forward algorithm. If the attacker is only connected to a small amount of nodes in the network, nodes that are sufficiently far away can still use the "fast mode". We also proposed to add a flag to a block-packet that every node has to set indicating whether it has verified the block or just forwarded it. If a peer would set this flag on an invalid block, they would be evicted from the peer-list.
 
