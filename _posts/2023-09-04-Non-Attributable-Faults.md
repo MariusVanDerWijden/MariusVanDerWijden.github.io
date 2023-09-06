@@ -36,10 +36,9 @@ Suppose we have two players `A` and `B`.
 2. `B` verifies that `hashEnc` matches the encrypted data they received.
 	`hashEnc' = h(encData'); if hashEnc' != hashEnc : abort`
 	`B` sends a conditional payment to the smart contract with the following conditions:
-
-		If `A` fails to send key `k` that matches `hashKey` within a time period, the payment is reverted
-		If `B` provides a valid fault proof within a time period, the payment is reverted
-		Otherwise the payment is executed and send to `A`
+		- If `A` fails to send key `k` that matches `hashKey` within a time period, the payment is reverted
+		- If `B` provides a valid fault proof within a time period, the payment is reverted
+		- Otherwise the payment is executed and send to `A`
 
 3. `A` sends the key `key'` to the smart contract. The contract verifies that `h(key')` matches `hashKey`.
 
@@ -48,7 +47,6 @@ Suppose we have two players `A` and `B`.
 	If the hash of the decrypted data matches the known `hash`, B terminates and the payment is executed.
 	If the hash does not match, `B` sends `data'` as a fault proof to the smart contract.
 	The smart contract verifies the fault proof and reverts the payment if the fault proof was correct.
-
 		- It computes `encData'`= ENC(data', key)` 
 		- and verifies that `h(encData') == hashEnc` and `h(data') != `h(data)`
 
@@ -87,8 +85,8 @@ Right now the bidding process is kinda backwards in my opinion. Instead of valid
 
 The fault proof works as follows:
 
-`B` sends the following data {txs, postState, difference} to `A`.
-The fault proof contains {preState, txs, postState, difference}
+`B` sends the following data `{txs, postState, difference}` to `A`.
+The fault proof contains `{preState, txs, postState, difference}``
 All transactions are simulated in the smart contract. The smart contract verifies a proof to account of `A` in the pre-state and the post-state.
 The fault proof is valid, if the difference between pre and post-state are unequal to the difference claimed by `B`. 
 
@@ -103,7 +101,7 @@ Improvements:
 
 #### Fault Proof Construction II
 
-The fault proof contains {preStateHash, tx, postStateHash, difference}.
+The fault proof contains `{preStateHash, tx, postStateHash, difference}``.
 
 In this construction we only provide proofs to the preState, postState and one transaction.
 `B` needs to send the following data to `V`: `{preStateHash, tx_1, postStateHash_1, difference_1, ..., sumDifference}`.
