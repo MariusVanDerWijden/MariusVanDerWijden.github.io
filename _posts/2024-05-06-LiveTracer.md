@@ -21,6 +21,8 @@ If you want to be 100% accurrate you need to look at all balance changes of your
 # The tracer
 Once you copied the tracer code (in the Appendix) to `eth/tracers/live/address.go` and rebuild geth, you can run the live tracer with the command `./build/bin/geth --vmtrace "address" --vmtrace.jsonconfig '{"path":".", "addresses":["0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D"]}'`
 
+There are some caveats with this basic tracer though, balance changes can be reverted if a transaction reverts and it does only pick up on very specific events from ERC-20 contracts. It does not correctly track non-standard tokens. Also the tracer will overwrite any existing csv files on startup.
+
 ## Output
 
 The tracer will output CSV files for every address you specified in the config. 
