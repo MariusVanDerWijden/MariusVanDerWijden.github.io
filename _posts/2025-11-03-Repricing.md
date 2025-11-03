@@ -7,7 +7,7 @@ categories:    blog
 tags:          ethereum glamsterdam repricing EVM
 ---
 
-_Thanks to Ansgar Dietrichs for reviewing_
+_Thanks to Ansgar Dietrichs, Caspar Schwarz-Schilling and Maria Inês Silva for reviewing_
 
 Glamsterdam is in the process of being scoped at the moment. The two headliner features have been locked in: EPBS and BAL, now the real work begins in deciding on adding non-headliner features that will complement the headliners. Non-headliners should in my opinion be judged on three dimensions: **Impact**, **Readiness** and **Ease of Implementation**.
 
