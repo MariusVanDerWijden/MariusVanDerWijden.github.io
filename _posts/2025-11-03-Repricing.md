@@ -60,7 +60,7 @@ These EIPs are trying to harmonize the costs between the three key resources Eth
 
 ### Nice-to-Have
 -[EIP-8011: Multidimensional Gas Metering](https://eips.ethereum.org/EIPS/eip-8011) lets us meter different resource independently which allows for better control of the key resources.
-- [EIP-8059: Gas Units Rebase for High-precision Metering](https://eips.ethereum.org/EIPS/eip-8059) anchors the gas cost to a different anchor than currently in order to increase precision.
+- [EIP-8059: Gas Units Rebase for High-precision Metering](https://eips.ethereum.org/EIPS/eip-8059) anchors the gas cost to a different anchor than currently in order to increase precision. I don't think the actual proposed anchor (1000x) is what we should do, but some anchoring needs to happen.
 
 ### Argue against
 I would argue against the following EIPs:
