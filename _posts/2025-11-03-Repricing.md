@@ -7,6 +7,8 @@ categories:    blog
 tags:          ethereum glamsterdam repricing EVM
 ---
 
+_Thanks to Ansgar Dietrichs for reviewing_
+
 Glamsterdam is in the process of being scoped at the moment. The two headliner features have been locked in: EPBS and BAL, now the real work begins in deciding on adding non-headliner features that will complement the headliners. Non-headliners should in my opinion be judged on three dimensions: **Impact**, **Readiness** and **Ease of Implementation**.
 
 EIPs that excel in only of these categories are, in my opinion, not great candidates for non-headliner features. In this post, I want to argue, why the repricing EIPs are the most important upgrades we can make to Ethereum at this point in time.
@@ -16,7 +18,9 @@ Repricings have a big impact on scalability. They let us redjust the cost of dif
 
 ![Geth benchmarks](https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/pricing-benchmarks.png)
 
-As you can see in the picture, the throughput of different operations varies widely. While some operations are executable at ~50 Megagas/s, others could be executed at more than 3 Gigagas/s. With the repricing we are trying to harmonize the different operations in order to safely increase the gas limit. 
+As you can see in the picture, the throughput of different operations varies widely. While some operations are executable at ~50 Megagas/s, others could be executed at more than 3 Gigagas/s. With the repricing we are trying to harmonize the different operations in order to safely increase the gas limit.
+
+If you want to learn more, Ansgar and Caspar made a pretty good case for the impact of repricings [here](https://notes.ethereum.org/@ansgar/repricings-for-glamsterdam).
 
 # Readiness
 This is the weakest point of the repricing proposals at the moment in my opinion. We have a very clear view of which operations and areas we want to reprice, but the numbers are not reliable yet. 
@@ -31,6 +35,8 @@ I am anticipating that the repricing efforts will result in client devs finding 
 # Repricing EIPs
 Now to the actual EIPs and my **personal** ranking of them.
 The Glamsterdam [meta EIP](https://eips.ethereum.org/EIPS/eip-7773) currently contains 44 EIPs that are proposed of inclusion. 10+ of them are related to gas repricings. I would like to categorize them in three different categories: _crucial_, _important_ and _nice to have_.
+
+My grouping is based on [Maria's document](https://notes.ethereum.org/0jBx_uqaR5movhHii8V76Q?both), but I differ on a few EIPs, especially in the latter categories.
 
 ### Crucial
 The crucial category contains EIPs that I think are very crucial to the goal of repricings. Without them, the repricing efforts are not worth it in my opinion.
@@ -48,21 +54,21 @@ These EIPs are trying to harmonize the costs between the three key resources Eth
 ### Important
 
 - [EIP-8032: Size-Based Storage Gas Pricing](https://eips.ethereum.org/EIPS/eip-8032) decrease gas costs for storage in smaller contracts
-- [EIP-8059: Gas Units Rebase for High-precision Metering](https://eips.ethereum.org/EIPS/eip-8059) anchors the gas cost to a different anchor than currently in order to increase precision.
+- [EIP-8058: Contract Bytecode Deduplication Discount](https://eips.ethereum.org/EIPS/eip-8058) with significant increases in costs for creating state, we can give refunds to duplicated code, which makes up a significant share of contracts.
+- [EIP-2926: Chunk-Based Code Merkleization](https://eips.ethereum.org/EIPS/eip-2926) Introduces code-chunking which allows for initcode and code size increases, something users have been asking for a lot.
 
 
 ### Nice-to-Have
-- [EIP-8058: Contract Bytecode Deduplication Discount](https://eips.ethereum.org/EIPS/eip-8058) with significant increases in costs for creating state, we can give refunds to duplicated code, which makes up a significant share of contracts.
-- [EIP-2926: Chunk-Based Code Merkleization](https://eips.ethereum.org/EIPS/eip-2926) Introduces code-chunking which allows for initcode and code size increases.
 -[EIP-8011: Multidimensional Gas Metering](https://eips.ethereum.org/EIPS/eip-8011) lets us meter different resource independently which allows for better control of the key resources.
+- [EIP-8059: Gas Units Rebase for High-precision Metering](https://eips.ethereum.org/EIPS/eip-8059) anchors the gas cost to a different anchor than currently in order to increase precision.
 
 ### Argue against
 I would argue against the following EIPs:
 
--[EIP-7971: Hard Limits for Transient Storage](https://eips.ethereum.org/EIPS/eip-7971) this EIP is incompatible with AA unfortunately.
+- [EIP-7971: Hard Limits for Transient Storage](https://eips.ethereum.org/EIPS/eip-7971) this EIP is incompatible with AA unfortunately.
 - [EIP-8053: Milli-gas for High-precision Gas Metering](https://eips.ethereum.org/EIPS/eip-8053) its an alternative to EIP-8059 and I think introducing decimals in the EVM will make the protocol unnecessary complex.
 - [EIP-8057: Inter-Block Temporal Locality Gas Discounts](https://eips.ethereum.org/EIPS/eip-8057) this would enshrine the caching behavior of clients in protocol.
-- [EIP-7923: Linear, Page-Based Memory Costing](https://eips.ethereum.org/EIPS/eip-7923) unnecessarily complicates the memory model and leads to significant redesigns of the EVM implmentations.
+- [EIP-7923: Linear, Page-Based Memory Costing](https://eips.ethereum.org/EIPS/eip-7923) unnecessarily complicates the memory model and leads to significant redesigns of the EVM implmentations. There are also AA implications.
 
 # Conclusion
 In conclusion, I think repricings are the most important feature to include in Glamsterdam as it will allow us to significantly improve the throughput of Ethereum. The EIPs are very easy to implement and while the numbers are not ready yet, we have invested a lot in the testing and benchmarking infrastructure to get them quickly and reliably.
