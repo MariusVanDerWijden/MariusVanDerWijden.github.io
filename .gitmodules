@@ -1,3 +1,3 @@
 [submodule "l1-scaling-fyi"]
-	path = l1-scaling-fyi
+	path = scaling
 	url = https://github.com/MariusVanDerWijden/l1-scaling-fyi
