@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>FuzzyVM &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Introducing FuzzyVM [fuzz​ɛvm] a guided differential fuzzing framework for Ethereum Virtual Machines">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2021/05/02/FuzzyVM/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="FuzzyVM">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2021/05/02/FuzzyVM/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="FuzzyVM" />
+    <meta name="twitter:description" content="Introducing FuzzyVM [fuzz​ɛvm] a guided differential fuzzing framework for Ethereum Virtual Machines" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2021/05/02/FuzzyVM/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>FuzzyVM</h1>
+  <span class="post-meta">May 2, 2021</span><br>
+  
+  <span class="post-meta small">
+  
+    5 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>In this post I like to introduce <a href="http://www.github.com/MariusVanDerWijden/FuzzyVM">FuzzyVM [fuzz​ɛvm]</a>
+a guided differential fuzzing framework for Ethereum Virtual Machines (EVM).
+It found two consensus issues on the Ethereum mainnet.</p>
+
+<p>Ethereum, contrary to most other blockchain network, has multiple implementations of the Ethereum protocol.
+This allows the network to be resilient in the case of attacks or bugs as demonstrated in the <a href="https://www.coindesk.com/so-ethereums-blockchain-is-still-under-attack">Shanghai attacks</a>.
+Having multiple implementations also us to test implementations against each other to find differences.</p>
+
+<p>These differences are often critical to the health of the network as all nodes have to agree on the current state of the network.
+If a node does not agree on the same state as the rest, it can not validate blocks and is therefore forked off the network.
+These consesus issues are critical for the health of the network.
+A consensus issue for example forked off all OpenEthereum nodes after the <a href="https://docs.google.com/document/d/18BhIEB7V_f_GkL8NZptxq-xadu5sb8QUzego8YVVMUM/edit#heading=h.nxtmf7qzhoyo">Berlin hardfork</a>.
+This issue resulted in most block explorers being stuck.
+Fortunately the issue was quickly resolved and the nodes were updated to follow the <a href="https://www.coindesk.com/open-ethereum-clients-error-berlin">canonical chain</a>.</p>
+
+<p>The EVM is an integral part of an Ethereum node as it executes the state transition.
+Smart Contracts in Ethereum are usually written in a high level language like Solidity, Vyper or Fe.
+The high level language gets compiled to EVM bytecode which is deployed on-chain.
+This EVM bytecode is executed if a transaction is send to the contract.
+The EVM provides over 80 Opcodes (like ADD, SUB, CALL) as well as 9 complex functions as precompiled contracts.
+These precompiled contracts (also called precompiles) implement functions like recovering the signer from an ECDSA signature or verifying a bilinear pairing on the BN256 curve.</p>
+
+<p>The Ethereum Foundation maintains a set of test cases in the ethereum/tests repository.
+These tests can be executed by new implementations to determine if the EVM was implemented correctly.
+However, these tests can not cover all edge cases of the EVM.
+FuzzyVM uses guided fuzzing to create tests that cover more than the ethereum/tests.
+Guided fuzzing is a technique that measures the code coverage that a test achieved and mutates the test accordingly in order to increase the code coverage.
+This allows FuzzyVM to “learn” interesting inputs that trigger behaviour in the EVM.
+FuzzyVM currently tests go-ethereum, OpenEthereum, Besu, Nethermind and TurboGeth against each other.</p>
+
+<h2 id="architecture">Architecture</h2>
+
+<p>FuzzyVM consist of two processes, the generation and the execution process as shown in Figure 1.
+The generation process creates new state tests in the ethereum/tests format with the help of <a href="https://github.com/dvyukov/go-fuzz">go-fuzz</a> and <a href="https://github.com/holiman/goevmlab">goevmlab</a>.
+It uses different generation strategies to create interesting programs.
+The EVM provides precompiled contracts, that implement complex functions like signature recovery or pairings.
+A normal fuzzer would rarely create valid inputs to these functions.
+FuzzyVM employs generators to create inputs to these precompiles that passes all precondition checks.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/improved_struct.svg" alt="figure1" /></p>
+
+<p>The execution phase executes the tests on the EVM implementations with the help of <a href="https://github.com/holiman/goevmlab">goevmlab</a>.
+Most clients provide a standalone program for testing the EVM implementations as shown in Figure 2.
+During execution the EVMs produce a trace for every opcode that is executed.
+These traces are collected by FuzzyVM and compared against each other.
+Differences in the output are logged and the tests are saved for manual review later.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/node.svg" alt="figure2" /></p>
+
+<p>FuzzyVM makes it easy to introduce new generation strategies.
+This allows us to extend it for testing new EIP’s once a chainspec for them exist, which makes introducing new changes to the Ethereum Virtual Machine safer.</p>
+
+<h2 id="trophies">Trophies</h2>
+
+<p>FuzzyVM found two consensus crashes in Ethereum mainnet clients as well as multiple non-critical issues in the test binaries.
+Both bugs were privately disclosed to the client teams.</p>
+
+<p>The CALLDATACOPY, CODECOPY, EXTCODECOPY and RETURNDATACOPY opcodes consume three
+items from the stack; the destination, source and length of the data that should be copied.
+The Nethermind client halted execution when the length was zero for these four opcodes.
+Thus calling them with length set to zero would alter the execution and provide an invalid state root.
+FuzzyVM created tests that triggered this behaviour with the CALLDATACOPY and CODECOPY opcodes.
+The flaw in the other two opcodes was found during manual review.</p>
+
+<p>The second critical flaw found by FuzzyVM concerns the ModExp precompile in the Besu client. 
+The ModExp precompile consumes six parameters from the stack; the base length, modulus length, exponent length, base, modulus and exponent. 
+If the base length and the modulus length are zero, Besu would read the exponent length and the exponent anyway. 
+If the exponent was set to a high number it could overflow causing the client to crash.
+Thus all Besu nodes that would receive a block containing a transaction that trigger this bug would crash.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Satoshi Nakamoto once wrote that he doesn’t believe “a second, compatible implementation of Bitcoin will ever be a good idea”.
+I disagree. 
+Ethereum’s client diversity is unmatched in the crypto-space and makes Ethereum resilient against attacks.
+Having different clients also allows us to test the different clients against each other to find undefined behaviour in the Ethereum protocol.
+FuzzyVM provides an easy way to test EVM implementations and we hope that more EVM implementations can be added to the mix.
+It allows us to fuzz-test new EIPs and to find regressions in the existing clients.</p>
+
+<h2 id="next-steps">Next Steps</h2>
+
+<p>The goal of FuzzyVM is making Ethereum safer, thus we would like to add more ETH1 clients to the fuzzing mix.
+EVM clients can join the fuzzing efforts, if they implement EIP-3155 which describes a common format for EVM traces (it still needs some work).
+If you are a client developer and want to have your implementation fuzzed, you can drop me an E-Mail at marius@ethereum.org.
+In the future we would like to add more fuzzing strategies to the mix that can test more assumptions as well as create strategies for new and upcoming EIPs.
+Contributions are very welcome, you can find the repository at <a href="http://www.github.com/MariusVanDerWijden/FuzzyVM">github.com/MariusVanDerWijden/FuzzyVM</a></p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

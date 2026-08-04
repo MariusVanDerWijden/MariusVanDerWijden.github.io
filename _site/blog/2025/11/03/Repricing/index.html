@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Why we should prioritize repricings in Glamsterdam &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This post explains my current view on the Ethereum roadmap, the proposed repricing EIPs and why we should prioritize them in Glamsterdam">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2025/11/03/Repricing/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Why we should prioritize repricings in Glamsterdam">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2025/11/03/Repricing/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Why we should prioritize repricings in Glamsterdam" />
+    <meta name="twitter:description" content="This post explains my current view on the Ethereum roadmap, the proposed repricing EIPs and why we should prioritize them in Glamsterdam" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2025/11/03/Repricing/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Why we should prioritize repricings in Glamsterdam</h1>
+  <span class="post-meta">Nov 3, 2025</span><br>
+  
+  <span class="post-meta small">
+  
+    5 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p><em>Thanks to Ansgar Dietrichs, Caspar Schwarz-Schilling and Maria Inês Silva for reviewing</em></p>
+
+<p>Glamsterdam is in the process of being scoped at the moment. The two headliner features have been locked in: EPBS and BAL, now the real work begins in deciding on adding non-headliner features that will complement the headliners. Non-headliners should in my opinion be judged on three dimensions: <strong>Impact</strong>, <strong>Readiness</strong> and <strong>Ease of Implementation</strong>.</p>
+
+<p>EIPs that excel in only of these categories are, in my opinion, not great candidates for non-headliner features. In this post, I want to argue, why the repricing EIPs are the most important upgrades we can make to Ethereum at this point in time.</p>
+
+<h1 id="impact">Impact</h1>
+<p>Repricings have a big impact on scalability. They let us redjust the cost of different resources. This way we can utilize the existing resources of the network better and we are not forced to increase the requirements for node operators when we increase the throughput of Ethereum.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/pricing-benchmarks.png" alt="Geth benchmarks" /></p>
+
+<p>As you can see in the picture, the throughput of different operations varies widely. While some operations are executable at ~50 Megagas/s, others could be executed at more than 3 Gigagas/s. With the repricing we are trying to harmonize the different operations in order to safely increase the gas limit.</p>
+
+<p>If you want to learn more, Ansgar and Caspar made a pretty good case for the impact of repricings <a href="https://notes.ethereum.org/@ansgar/repricings-for-glamsterdam">here</a>.</p>
+
+<h1 id="readiness">Readiness</h1>
+<p>This is the weakest point of the repricing proposals at the moment in my opinion. We have a very clear view of which operations and areas we want to reprice, but the numbers are not reliable yet.</p>
+
+<p>We started a significant effort at the Ethereum Foundation in collaboration with Nethermind in order to produce benchmarks that show which operations are over or underpriced and I am very confident that within the next few weeks, we will start to have better numbers and be able to finalize them by the beginning of next year.</p>
+
+<h1 id="ease-of-implementation">Ease of Implementation</h1>
+<p>Most of the repricing EIPs are very easy to implement for client teams as they are only changing a few constants in the code. The bulk of the work is in proposing the numbers and verifying that all Execution Layer Clients are able to execute with the expected speed.</p>
+
+<p>I am anticipating that the repricing efforts will result in client devs finding a lot of improvements in their code during the implementation and benchmarking process, which will make clients even faster than today!</p>
+
+<h1 id="repricing-eips">Repricing EIPs</h1>
+<p>Now to the actual EIPs and my <strong>personal</strong> ranking of them.
+The Glamsterdam <a href="https://eips.ethereum.org/EIPS/eip-7773">meta EIP</a> currently contains 44 EIPs that are proposed of inclusion. 10+ of them are related to gas repricings. I would like to categorize them in three different categories: <em>crucial</em>, <em>important</em> and <em>nice to have</em>.</p>
+
+<p>My grouping is based on <a href="https://notes.ethereum.org/0jBx_uqaR5movhHii8V76Q?both">Maria’s document</a>, but I differ on a few EIPs, especially in the latter categories.</p>
+
+<h3 id="crucial">Crucial</h3>
+<p>The crucial category contains EIPs that I think are very crucial to the goal of repricings. Without them, the repricing efforts are not worth it in my opinion.</p>
+
+<ul>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7904">EIP-7904: General Repricing</a> harmonizes costs across compute operations</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8038">EIP-8038: State-access gas cost update</a> increase (and harmonize) the cost of operations that access state.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8037">EIP-8037: State Creation Gas Cost Increase</a>  increase (and harmonize) the cost of operations that create state.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-2780">EIP-2780: Reduce intrinsic transaction gas</a> harmonize the cost of ETH transfer with the compute, data and state operations.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7981">EIP-7981: Increase access list cost</a> increase the cost of access lists.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7976">EIP-7976: Increase Calldata Floor Cost</a> increase the cost of call data.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7778">EIP-7778: Block Gas Accounting without Refunds</a> refunds are applied <em>after</em> the block, thus the block gaslimit can not be cicumvented.</li>
+</ul>
+
+<p>These EIPs are trying to harmonize the costs between the three key resources Ethereum has: Compute, Data and State. They are trying to address the worst case blocks that attackers could create. Removing these bottlenecks will allow us to significantly increase the gas limit without the fear of attacks.</p>
+
+<h3 id="important">Important</h3>
+
+<ul>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8032">EIP-8032: Size-Based Storage Gas Pricing</a> decrease gas costs for storage in smaller contracts</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8058">EIP-8058: Contract Bytecode Deduplication Discount</a> with significant increases in costs for creating state, we can give refunds to duplicated code, which makes up a significant share of contracts.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-2926">EIP-2926: Chunk-Based Code Merkleization</a> Introduces code-chunking which allows for initcode and code size increases, something users have been asking for a lot.</li>
+</ul>
+
+<h3 id="nice-to-have">Nice-to-Have</h3>
+<ul>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8011">EIP-8011: Multidimensional Gas Metering</a> lets us meter different resource independently which allows for better control of the key resources.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8059">EIP-8059: Gas Units Rebase for High-precision Metering</a> anchors the gas cost to a different anchor than currently in order to increase precision. I don’t think the actual proposed anchor (1000x) is what we should do, but some anchoring needs to happen.</li>
+</ul>
+
+<h3 id="argue-against">Argue against</h3>
+<p>I would argue against the following EIPs:</p>
+
+<ul>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7971">EIP-7971: Hard Limits for Transient Storage</a> this EIP is incompatible with AA unfortunately.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8053">EIP-8053: Milli-gas for High-precision Gas Metering</a> its an alternative to EIP-8059 and I think introducing decimals in the EVM will make the protocol unnecessary complex.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-8057">EIP-8057: Inter-Block Temporal Locality Gas Discounts</a> this would enshrine the caching behavior of clients in protocol.</li>
+  <li><a href="https://eips.ethereum.org/EIPS/eip-7923">EIP-7923: Linear, Page-Based Memory Costing</a> unnecessarily complicates the memory model and leads to significant redesigns of the EVM implmentations. There are also AA implications.</li>
+</ul>
+
+<h1 id="conclusion">Conclusion</h1>
+<p>In conclusion, I think repricings are the most important feature to include in Glamsterdam as it will allow us to significantly improve the throughput of Ethereum. The EIPs are very easy to implement and while the numbers are not ready yet, we have invested a lot in the testing and benchmarking infrastructure to get them quickly and reliably.</p>
+
+<p>So contact your local core developer and ask them to support repricings for Glamsterdam! :P</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

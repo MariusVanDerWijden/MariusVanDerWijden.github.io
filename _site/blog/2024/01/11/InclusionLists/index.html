@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>In support of simple inclusion lists &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This post should illustrate my ideas around inclusion lists and why a simpler approach might be better in the short term over existing proposals">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2024/01/11/InclusionLists/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="In support of simple inclusion lists">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2024/01/11/InclusionLists/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="In support of simple inclusion lists" />
+    <meta name="twitter:description" content="This post should illustrate my ideas around inclusion lists and why a simpler approach might be better in the short term over existing proposals" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2024/01/11/InclusionLists/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>In support of simple inclusion lists</h1>
+  <span class="post-meta">Jan 11, 2024</span><br>
+  
+  <span class="post-meta small">
+  
+    3 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>Since I joined the Foundation in April 2020, a feeling grew stronger that we are playing whack-a-mole with the protocol. Optional access-lists to un-break a few contracts, preserving self-destruct if called within a deployment, Push 0 and many more. Yes they enable legitimate use-cases, but are they really worth the effort and complexity that they add to the protocol?</p>
+
+<p>Inclusion lists have been proposed in order to preserve the censorship resistance of the protocol. The current proposal (as far as I understand) proposes that validators that want to have certain transactions included, will add them to a list and the proposer for the next slot will need to include them or miss their block proposal.</p>
+
+<p>This will, in theory, force block producers to include transactions into their block, that they otherwise wouldn’t and allow them to argue that they are forced by the protocol to include those transactions even if they don’t want to. I disagree, because I think in practice it would mean that they will be forced to not participate in the protocol anymore. Forcing someone to include anything against their will, will not work very long and validators and block producers will be forced to stop playing the game.</p>
+
+<p>There might be workable schemes in the future, but the proposals I have seen were not great in my opinion and would not move the status quo.</p>
+
+<p>I am in favor of implementing an optional inclusion list feature in clients as follows:</p>
+
+<ul>
+  <li>Validators that want to include transactions to or from certain accounts can configure these accounts in their Execution Layer Client.</li>
+  <li>Before proposing a block, validators ask their EL client for a list of transactions matching their criteria, the inclusion list</li>
+  <li>Validators send the inclusion list to the builders that they are connected to via MEV-Boost</li>
+  <li>Relays and Builders can decide whether they would like to build a block with those transactions</li>
+  <li>If they refuse to build a block with those transactions, they can just not bid on it and the block will be built by willing relayers/builders or the local execution layer client</li>
+  <li>If they accept to build the block, they send an inclusion proof of the transactions and the blinded block to the validator, as usual in MEV-Boost</li>
+  <li>The validator signs the highest bidding block that has the inclusion proof for the transactions that they required</li>
+</ul>
+
+<p>The inclusion proof is very easy to build, since the transaction hashes are merkelized in the transaction root of the execution block.</p>
+
+<p>This scheme gives us the best of both worlds in my opinion:</p>
+
+<ul>
+  <li>Validators do not miss out on MEV-blocks if no censorship is happening</li>
+  <li>Relays and Block builders can enforce their policies of not building certain blocks</li>
+  <li>Relays and Block builders are incentivized to not censor as they will loose significant market-share otherwise</li>
+  <li>Validators can prioritize their own transactions even if they pay below market tips.</li>
+</ul>
+
+<p>This scheme can be implemented quite quickly without a hard-fork by adding optional fields to the messages between relay and CL client, and adding two new endpoints to the Execution Layer clients: <code class="language-plaintext highlighter-rouge">engine_setLocalAccounts</code> and <code class="language-plaintext highlighter-rouge">engine_getLocalTransactions</code>.</p>
+
+<p>In conclusion: I would prefer implementing an optional protocol that does not need a hard-fork and rolling it out as soon as possible over adding a complicated scheme under consensus were we don’t know whether Relays and Block builders will follow it and where having multiple consecutive blocks gives bigger stakers and pools an advantage over smaller operations.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ethereum L1 Gas Limit Scaling</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+
+        .calculator-card {
+            margin-top: 25px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .calculator-header h2 {
+            font-size: 1.75rem;
+            color: #1f2937;
+            margin-bottom: 5px;
+        }
+
+        .calculator-header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .calculator-controls {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .control-group select,
+        .control-group input[type="number"] {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: #f9fafb;
+        }
+
+        .slider-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .slider-row input[type="range"] {
+            width: 100%;
+            accent-color: #667eea;
+        }
+
+        .slider-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preset-button {
+            padding: 6px 12px;
+            border-radius: 9999px;
+            border: 1px solid #cbd5f5;
+            background: #eef2ff;
+            color: #4c51bf;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .preset-button:hover {
+            background: #e0e7ff;
+        }
+
+        .blob-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: #4b5563;
+            flex-wrap: wrap;
+        }
+
+        .simulator-mgas-prominent {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border: 2px solid #667eea;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .simulator-mgas-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: baseline;
+            gap: 2rem;
+        }
+
+        .simulator-mgas-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #4338ca;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        .simulator-mgas-unit {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4f46e5;
+            margin-left: 2px;
+        }
+
+        .simulator-block-gas {
+            font-size: 1rem;
+            color: #4b5563;
+            margin-top: 8px;
+        }
+
+        .simulator-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .transfer-table {
+            width: 100%;
+            margin-top: 25px;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .transfer-table thead {
+            background: #f3f4f6;
+        }
+
+        .transfer-table th,
+        .transfer-table td {
+            text-align: left;
+            padding: 12px 15px;
+        }
+
+        .transfer-table tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .transfer-table tbody tr + tr {
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .transfer-table input[type="number"] {
+            width: 100%;
+        }
+
+        .scenario-notes {
+            color: #6b7280;
+            font-size: 0.85rem;
+        }
+
+        .calculator-footnote {
+            margin-top: 20px;
+            color: #6b7280;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .roadblocks-card {
+            margin-top: 25px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .roadblocks-header h2 {
+            font-size: 1.75rem;
+            color: #1f2937;
+            margin-bottom: 30px;
+        }
+
+        .roadblocks-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 auto;
+            position: relative;
+            padding-left: 40px;
+            max-width: 800px;
+        }
+
+        .roadblocks-list::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .roadblocks-list li {
+            padding: 25px 0;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .roadblocks-list li::before {
+            content: '';
+            position: absolute;
+            left: -32px;
+            top: 28px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px #667eea;
+            z-index: 1;
+        }
+
+        .roadblocks-list li:first-child::before {
+            background: #10b981;
+            box-shadow: 0 0 0 3px #10b981;
+        }
+
+        .roadblocks-list li:last-child {
+            padding-bottom: 0;
+        }
+
+        .roadblock-gas {
+            font-weight: 700;
+            color: #667eea;
+            min-width: 100px;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+        }
+
+        .roadblock-description {
+            color: #4b5563;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+
+        .roadblock-status {
+            font-size: 0.95rem;
+            color: #10b981;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        .faq-card {
+            margin-top: 25px;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .faq-header h2 {
+            font-size: 1.75rem;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+
+        .faq-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            margin-bottom: 30px;
+        }
+
+        .faq-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .faq-item {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .faq-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .faq-question {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .faq-answer {
+            color: #4b5563;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .faq-answer ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+
+        .faq-answer li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .faq-answer strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .faq-answer a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+
+        .faq-answer a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.15);
+            padding: 6px;
+            border-radius: 12px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-tab {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-tab.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .content-panel {
+            display: none;
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            .chart-container {
+                height: 300px;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .calculator-controls {
+                grid-template-columns: 1fr;
+            }
+            .simulator-controls-grid {
+                grid-template-columns: 1fr;
+            }
+            .blob-stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .roadblocks-list {
+                padding-left: 35px;
+            }
+            .roadblocks-list::before {
+                left: 12px;
+            }
+            .roadblocks-list li::before {
+                left: -27px;
+            }
+            .roadblocks-list li {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .roadblock-gas {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ethereum L1 Scaling</h1>
+        <nav class="nav-tabs" role="tablist">
+            <button type="button" class="nav-tab active" role="tab" id="tab-gas" aria-selected="true">L1 Gas Limit</button>
+            <button type="button" class="nav-tab" role="tab" id="tab-blobs" aria-selected="false">Blobs</button>
+        </nav>
+
+        <div id="content-gas" class="content-panel active">
+        <div class="chart-card">
+            <div class="chart-container">
+                <canvas id="blobChart"></canvas>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="currentCount">-</div>
+                    <div class="stat-label">Current Gas Limit</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="currentMax">-</div>
+                    <div class="stat-label">Current Max</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="calculator-card">
+            <div class="calculator-header">
+                <h2>Transaction Throughput Estimator</h2>
+                <p>Estimate transaction throughput based on gas limit and common transaction gas costs.</p>
+            </div>
+
+            <div class="calculator-controls">
+                <div class="control-group">
+                    <label for="milestoneSelect">Gas limit milestone</label>
+                    <select id="milestoneSelect" aria-label="Select gas limit milestone">
+                        <option>Loading milestones…</option>
+                    </select>
+                    <div class="slider-buttons" style="margin-top:8px">
+                        <button type="button" class="preset-button" data-preset="target">Use target</button>
+                        <button type="button" class="preset-button" data-preset="max">Use max</button>
+                    </div>
+                    <span class="scenario-notes" id="milestoneContext"></span>
+                </div>
+            </div>
+            <div class="simulator-mgas-prominent">
+                <div class="simulator-mgas-row">
+                    <div><span id="blockGasValue" class="simulator-mgas-value">60M</span><span class="simulator-mgas-unit"> block gas</span></div>
+                    <div><span id="mgasDisplayValue" class="simulator-mgas-value">5</span><span class="simulator-mgas-unit"> M gas/s/slot</span></div>
+                </div>
+                <div class="simulator-block-gas" id="blockGasFormula">3 s × 1 × 20 M gas/s</div>
+            </div>
+            <div class="simulator-controls-grid">
+                <div class="control-group">
+                    <label for="executionTimeSlider">Execution time (s)</label>
+                    <div class="slider-row">
+                        <input type="range" id="executionTimeSlider" min="1" max="5" value="3" step="1" aria-label="Execution time in seconds">
+                        <span class="scenario-notes" id="executionTimeValue">3 s</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="parallelismSlider">BAL parallelism</label>
+                    <div class="slider-row">
+                        <input type="range" id="parallelismSlider" min="1" max="3" value="1" step="1" aria-label="BAL parallelism">
+                        <span class="scenario-notes" id="parallelismValue">1</span>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label for="mgasSlider">M gas/s</label>
+                    <div class="slider-row">
+                        <input type="range" id="mgasSlider" min="1" max="100" value="20" step="0.01" aria-label="Million gas per second">
+                        <span class="scenario-notes" id="mgasSliderValue">20 M gas/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <table class="transfer-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Scenario</th>
+                        <th scope="col">Gas cost per transaction</th>
+                        <th scope="col">Est. TPS</th>
+                        <th scope="col">Est. tx/block</th>
+                    </tr>
+                </thead>
+                <tbody id="transferTableBody">
+                    <!-- Populated by script -->
+                </tbody>
+            </table>
+
+            <p class="calculator-footnote">
+                Block gas = M gas/s × execution time × BAL parallelism. Adjust the gas costs to explore different transaction types and complexity.
+            </p>
+        </div>
+        </div>
+
+        <div id="content-blobs" class="content-panel">
+        <div class="chart-card">
+            <div class="chart-container">
+                <canvas id="blobChartBlobs"></canvas>
+            </div>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="currentCountBlobs">-</div>
+                    <div class="stat-label">Current Target</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="currentMaxBlobs">-</div>
+                    <div class="stat-label">Current Max</div>
+                </div>
+            </div>
+        </div>
+        <div class="calculator-card">
+            <div class="calculator-header">
+                <h2>Rollup TPS Estimator</h2>
+                <p>Estimate how many rollup transactions per second fit in the available blob throughput for common transaction types.</p>
+            </div>
+            <div class="calculator-controls">
+                <div class="control-group">
+                    <label for="milestoneSelectBlobs">Blob scaling milestone</label>
+                    <select id="milestoneSelectBlobs" aria-label="Select blob scaling milestone">
+                        <option>Loading milestones…</option>
+                    </select>
+                    <span class="scenario-notes" id="milestoneContextBlobs"></span>
+                </div>
+                <div class="control-group">
+                    <label for="blobSliderBlobs">Blobs per block</label>
+                    <div class="slider-row">
+                        <input type="range" id="blobSliderBlobs" min="1" max="10" value="3" step="1">
+                        <div class="slider-buttons">
+                            <button type="button" class="preset-button" data-preset="target" data-mode="blobs">Use target</button>
+                            <button type="button" class="preset-button" data-preset="max" data-mode="blobs">Use max</button>
+                        </div>
+                    </div>
+                    <div class="blob-stats">
+                        <span id="blobCountDisplayBlobs">3 blobs/block</span>
+                        <span id="throughputDisplayBlobs">32.0 KB/s (0.03 MB/s)</span>
+                    </div>
+                </div>
+            </div>
+            <table class="transfer-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Scenario</th>
+                        <th scope="col">Data footprint (bytes)</th>
+                        <th scope="col">Est. TPS</th>
+                    </tr>
+                </thead>
+                <tbody id="transferTableBodyBlobs"></tbody>
+            </table>
+            <p class="calculator-footnote">
+                Assumes 12 second Ethereum block time and 128&nbsp;KB per blob. Adjust the data footprints to explore different compression or batching assumptions.
+            </p>
+        </div>
+        </div>
+
+        <div class="roadblocks-card">
+            <div class="roadblocks-header">
+                <h2>Technical Milestones</h2>
+            </div>
+            <ul class="roadblocks-list">
+                <li>
+                    <span class="roadblock-gas">60M gas:</span>
+                    <span class="roadblock-description">
+                        Fusaka repricing of Modexp <span class="roadblock-status">(already accomplished)</span>
+                    </span>
+                </li>
+                <li>
+                    <span class="roadblock-gas">80M gas:</span>
+                    <span class="roadblock-description">
+                        Glamsterdam repricing of worst cases, eth/70
+                    </span>
+                </li>
+                <li>
+                    <span class="roadblock-gas">100M gas:</span>
+                    <span class="roadblock-description">
+                        Calldata repricing
+                    </span>
+                </li>
+                <li>
+                    <span class="roadblock-gas">120M gas+:</span>
+                    <span class="roadblock-description">
+                        Resource harmonizations and re-anchoring<br>
+                        Transaction pool refactoring
+                    </span>
+                </li>
+                <li>
+                    <span class="roadblock-gas">30 blobs+:</span>
+                    <span class="roadblock-description">
+                        Cell level messaging and Sparse Blob pools
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="faq-card">
+            <div class="faq-header">
+                <h2>FAQ</h2>
+            </div>
+            <ul class="faq-list">
+                <li class="faq-item">
+                    <div class="faq-question">Why not just speed up the roadmap?</div>
+                    <div class="faq-answer">
+                        Security, stability, and consensus are our top priorities. Rushing upgrades on a network securing hundreds of billions of dollars is extremely risky. Every change requires extensive research, parallel implementation by multiple independent client teams, and rigorous testing. A rushed roadmap would inevitably lead to critical bugs and network instability.
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">What hardware are you targeting?</div>
+                    <div class="faq-answer">
+                        We are committed to keeping Ethereum accessible. Our goal is to ensure the L1 can be reliably run on consumer-grade hardware. The specific hardware specifications we are using as a benchmark for development are outlined in <strong><a href="https://eips.ethereum.org/EIPS/eip-7870" target="_blank" rel="noopener noreferrer">EIP-7870</a></strong>.
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Will these changes hurt decentralization?</div>
+                    <div class="faq-answer">
+                        No. Protecting decentralization is a core goal of this roadmap. The hardware targets in <a href="https://eips.ethereum.org/EIPS/eip-7870" target="_blank" rel="noopener noreferrer">EIP-7870</a> are specifically chosen to ensure that running a full node remains feasible for individuals, not just large-scale data centers. This is critical to preventing the centralization of node operators.
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">How can I contribute?</div>
+                    <div class="faq-answer">
+                        Community contributions are vital! You can help in several key ways:
+                        <ul>
+                            <li><strong>Write benchmarks:</strong> We always need more data. Write and run benchmarks for the proposed changes to help us understand their real-world impact on different hardware.</li>
+                            <li><strong>Contribute to clients:</strong> All client teams (Geth, Nethermind, Besu, Erigon, etc.) need developers to help implement, test, and optimize the new EIPs.</li>
+                            <li><strong>Spread the message:</strong> Help educate the community! Share high-quality information, participate in discussions, and help combat misinformation.</li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">Are any of these numbers (gas costs, block limits) final?</div>
+                    <div class="faq-answer">
+                        No. All numbers discussed in proposals, EIPs, and presentations are estimates and are subject to change. They are used for research and modeling. Final parameters will only be set after extensive testing, benchmarking, and community consensus.
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">How will gas repricings impact this?</div>
+                    <div class="faq-answer">
+                        The concept of "gas" will likely evolve. Gas will not mean the same anymore after the significant reprcings we are proposing. All numbers we are proposing here are subject to significant change and should illustrate how we are planning to scale compared to todays gas schedule.
+                    </div>
+                </li>
+                <li class="faq-item">
+                    <div class="faq-question">How will existing smart contracts be impacted by repricings?</div>
+                    <div class="faq-answer">
+                        When gas costs change, some operations will inevitably become more expensive (e.g., storage access), while most others (e.g., computation) will become significantly cheaper. We are analyzing existing on-chain data to understand this impact. The core goal is to break as few existing applications as possible while unlocking new, cheaper use cases.
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="footer" id="lastUpdated"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chart;
+        let chartBlobs = null;
+        const BLOCK_TIME_SECONDS = 12;
+        const BLOB_SIZE_BYTES = 128 * 1024;
+
+        function formatGasNumber(value) {
+            if (value >= 1000000) {
+                return (value / 1000000).toFixed(0) + 'M';
+            } else if (value >= 1000) {
+                return (value / 1000).toFixed(0) + 'K';
+            }
+            return value.toString();
+        }
+
+        const transferProfiles = [
+            {
+                id: 'eth-transfer',
+                label: 'ETH transfer',
+                defaultSize: 21000,
+                notes: 'Simple ETH transfer (21,000 gas)'
+            },
+            {
+                id: 'erc20-transfer',
+                label: 'ERC-20 transfer',
+                defaultSize: 65000,
+                notes: 'Token transfer with contract interaction (~65,000 gas)'
+            },
+            {
+                id: 'uniswap-trade',
+                label: 'Uniswap swap',
+                defaultSize: 150000,
+                notes: 'DEX swap transaction (~150,000 gas)'
+            }
+        ];
+
+        async function loadData(dataUrl) {
+            try {
+                const response = await fetch(dataUrl);
+                const data = await response.json();
+
+                if (data.lastUpdated) {
+                    const [year, month, day] = data.lastUpdated.split('-');
+                    const date = new Date(year, month - 1, day);
+                    const formattedDate = date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    document.getElementById('lastUpdated').innerHTML = `Projected data (open points on chart) are subject to change<br>Last updated: ${formattedDate}`;
+                }
+
+                return data.blobData;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                return [];
+            }
+        }
+
+        function normalizeGasLimitData(blobData) {
+            return blobData.map(d => {
+                if (d.mgas != null) {
+                    const exec = d.executionTime ?? 3;
+                    const par = d.parallelism ?? 1;
+                    const max = Math.round(d.mgas * exec * par * 1e6);
+                    const target = Math.round(max / 2);
+                    return { ...d, target, max };
+                }
+                return d;
+            });
+        }
+
+        function calculateStats(data) {
+            if (data.length === 0) return { current: 0, max: 0 };
+
+            // Get today's date
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset time to start of day
+
+            // Find the most recent upgrade that has already occurred
+            let currentTarget = 0;
+            let currentMax = 0;
+
+            for (const item of data) {
+                const [year, month, day] = item.date.split('-');
+                const upgradeDate = new Date(year, month - 1, day);
+
+                if (upgradeDate <= today && !item.projected) {
+                    currentTarget = item.target;
+                    currentMax = item.max;
+                }
+            }
+
+            return {
+                current: formatGasNumber(currentTarget),
+                max: formatGasNumber(currentMax)
+            };
+        }
+
+        function initCalculator(blobData) {
+            const milestoneSelect = document.getElementById('milestoneSelect');
+            const milestoneContext = document.getElementById('milestoneContext');
+            const executionTimeSlider = document.getElementById('executionTimeSlider');
+            const parallelismSlider = document.getElementById('parallelismSlider');
+            const mgasSlider = document.getElementById('mgasSlider');
+            const mgasDisplayValue = document.getElementById('mgasDisplayValue');
+            const blockGasValue = document.getElementById('blockGasValue');
+            const blockGasFormula = document.getElementById('blockGasFormula');
+            const executionTimeValue = document.getElementById('executionTimeValue');
+            const parallelismValue = document.getElementById('parallelismValue');
+            const mgasSliderValue = document.getElementById('mgasSliderValue');
+            const tableBody = document.getElementById('transferTableBody');
+
+            if (!milestoneSelect || !executionTimeSlider || !parallelismSlider || !mgasSlider || !tableBody || !mgasDisplayValue || !blockGasValue) return;
+
+            milestoneSelect.innerHTML = '';
+            blobData.forEach((milestone, index) => {
+                const option = document.createElement('option');
+                const dateLabel = formatUpgradeDate(milestone.date);
+                const projectedNotation = milestone.projected ? ' (projected)' : '';
+                option.value = String(index);
+                option.textContent = `${milestone['upgrade-name']} – ${dateLabel}${projectedNotation}`;
+                milestoneSelect.appendChild(option);
+            });
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let defaultIndex = 0;
+            for (let i = blobData.length - 1; i >= 0; i--) {
+                const [year, month, day] = blobData[i].date.split('-');
+                const milestoneDate = new Date(year, month - 1, day);
+                if (milestoneDate <= today) {
+                    defaultIndex = i;
+                    break;
+                }
+            }
+            milestoneSelect.value = String(defaultIndex);
+
+            tableBody.innerHTML = '';
+            transferProfiles.forEach(profile => {
+                const row = document.createElement('tr');
+                row.dataset.profileId = profile.id;
+                const scenarioCell = document.createElement('td');
+                scenarioCell.innerHTML = `<strong>${profile.label}</strong><div class="scenario-notes">${profile.notes}</div>`;
+                const inputCell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.value = profile.defaultSize;
+                input.dataset.profileId = profile.id;
+                input.setAttribute('aria-label', `${profile.label} gas cost per transaction`);
+                input.addEventListener('input', updateCalculations);
+                inputCell.appendChild(input);
+                const tpsCell = document.createElement('td');
+                tpsCell.className = 'tps-output';
+                tpsCell.textContent = '—';
+                const txPerBlockCell = document.createElement('td');
+                txPerBlockCell.className = 'tx-per-block-output';
+                txPerBlockCell.textContent = '—';
+                row.appendChild(scenarioCell);
+                row.appendChild(inputCell);
+                row.appendChild(tpsCell);
+                row.appendChild(txPerBlockCell);
+                tableBody.appendChild(row);
+            });
+
+            function getSimulatorParams() {
+                const executionTime = Number(executionTimeSlider.value) || 3;
+                const parallelism = Number(parallelismSlider.value) || 1;
+                const mgas = Number(mgasSlider.value) || 20;
+                const blockGasM = mgas * executionTime * parallelism;
+                const gasLimit = blockGasM * 1e6;
+                const gasPerSecond = mgas * parallelism * 1e6;
+                return { executionTime, parallelism, mgas, blockGasM, gasLimit, gasPerSecond };
+            }
+
+            function formatMgas(mgas) {
+                return mgas % 1 === 0 ? String(Math.round(mgas)) : Number(mgas).toFixed(2);
+            }
+
+            function updateSimulatorDisplay() {
+                const { executionTime, parallelism, mgas, blockGasM, gasLimit } = getSimulatorParams();
+                const mgasPerSlot = gasLimit / BLOCK_TIME_SECONDS / 1e6;
+                if (mgasDisplayValue) mgasDisplayValue.textContent = formatMgas(mgasPerSlot);
+                if (blockGasValue) blockGasValue.textContent = formatGasNumber(gasLimit);
+                if (blockGasFormula) blockGasFormula.textContent = `${executionTime} s × ${parallelism} × ${formatMgas(mgas)} M gas/s`;
+                if (executionTimeValue) executionTimeValue.textContent = executionTime + ' s';
+                if (parallelismValue) parallelismValue.textContent = String(parallelism);
+                if (mgasSliderValue) mgasSliderValue.textContent = formatMgas(mgas) + ' M gas/s';
+            }
+
+            function updateCalculations() {
+                const { gasLimit, gasPerSecond } = getSimulatorParams();
+                tableBody.querySelectorAll('tr').forEach(row => {
+                    const input = row.querySelector('input[type="number"]');
+                    const tpsCell = row.querySelector('.tps-output');
+                    const txPerBlockCell = row.querySelector('.tx-per-block-output');
+                    if (!input || !tpsCell || !txPerBlockCell) return;
+                    const gasCost = Number(input.value);
+                    if (!gasCost || gasCost <= 0) {
+                        tpsCell.textContent = '—';
+                        txPerBlockCell.textContent = '—';
+                        return;
+                    }
+                    const tps = gasPerSecond / gasCost;
+                    const fractionDigits = tps >= 100 ? 0 : 1;
+                    tpsCell.textContent = tps.toLocaleString(undefined, { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits }) + ' tx/s';
+                    const txPerBlock = Math.floor(gasLimit / gasCost);
+                    txPerBlockCell.textContent = txPerBlock.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) + ' tx';
+                });
+            }
+
+            function setSlidersFromMilestone(milestone, useTarget) {
+                const exec = milestone.executionTime ?? 3;
+                const par = milestone.parallelism ?? 1;
+                let mgas = Number(milestone.mgas);
+                if (useTarget && milestone.target != null) {
+                    const blockGasM = Number(milestone.target) / 1e6;
+                    mgas = blockGasM / (exec * par);
+                } else if (!Number.isFinite(mgas) || mgas <= 0) {
+                    const maxGas = Number(milestone.max);
+                    if (maxGas > 0 && Number.isFinite(maxGas)) mgas = (maxGas / 1e6) / (exec * par);
+                    else return;
+                }
+                mgas = Math.max(1, Math.min(100, mgas));
+                executionTimeSlider.value = String(exec);
+                parallelismSlider.value = String(par);
+                mgasSlider.value = String(Math.round(mgas * 100) / 100);
+                updateSimulatorDisplay();
+                updateCalculations();
+            }
+
+            function updateSliderFromMilestone() {
+                const selectedMilestone = getSelectedMilestone(blobData, milestoneSelect.value);
+                if (!selectedMilestone) return;
+                setSlidersFromMilestone(selectedMilestone, false);
+            }
+
+            function applyMilestoneContext() {
+                const selectedMilestone = getSelectedMilestone(blobData, milestoneSelect.value);
+                const targetButton = document.querySelector('#content-gas .preset-button[data-preset="target"]');
+                const maxButton = document.querySelector('#content-gas .preset-button[data-preset="max"]');
+                if (milestoneContext) {
+                    milestoneContext.textContent = selectedMilestone
+                        ? (selectedMilestone.projected ? 'Projected milestone based on roadmap targets.' : 'Live network milestone.')
+                        : 'Milestone data unavailable.';
+                }
+                if (targetButton) {
+                    if (selectedMilestone && selectedMilestone.target != null) {
+                        targetButton.textContent = 'Target (' + formatGasNumber(Number(selectedMilestone.target)) + ')';
+                        targetButton.disabled = false;
+                    } else {
+                        targetButton.textContent = 'Target (n/a)';
+                        targetButton.disabled = true;
+                    }
+                }
+                if (maxButton) {
+                    if (selectedMilestone && selectedMilestone.max != null) {
+                        maxButton.textContent = 'Max (' + formatGasNumber(Number(selectedMilestone.max)) + ')';
+                        maxButton.disabled = false;
+                    } else {
+                        maxButton.textContent = 'Max (n/a)';
+                        maxButton.disabled = true;
+                    }
+                }
+            }
+
+            executionTimeSlider.addEventListener('input', () => { updateSimulatorDisplay(); updateCalculations(); });
+            parallelismSlider.addEventListener('input', () => { updateSimulatorDisplay(); updateCalculations(); });
+            mgasSlider.addEventListener('input', () => { updateSimulatorDisplay(); updateCalculations(); });
+
+            milestoneSelect.addEventListener('change', () => {
+                updateSliderFromMilestone();
+                applyMilestoneContext();
+            });
+
+            document.querySelectorAll('#content-gas .preset-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const selectedMilestone = getSelectedMilestone(blobData, milestoneSelect.value);
+                    if (!selectedMilestone) return;
+                    const useTarget = button.dataset.preset === 'target';
+                    setSlidersFromMilestone(selectedMilestone, useTarget);
+                });
+            });
+
+            updateSliderFromMilestone();
+            applyMilestoneContext();
+            updateCalculations();
+        }
+
+        function getSelectedMilestone(blobData, selectedIndex) {
+            const index = Number(selectedIndex);
+            if (!Array.isArray(blobData) || Number.isNaN(index) || index < 0 || index >= blobData.length) {
+                return null;
+            }
+            return blobData[index];
+        }
+
+        function formatUpgradeDate(dateString) {
+            if (!dateString) return 'TBD';
+            const [year, month, day] = dateString.split('-');
+            const parsedDate = new Date(year, month - 1, day);
+            if (Number.isNaN(parsedDate.getTime())) return 'TBD';
+            return parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        async function initChart() {
+            let blobData = await loadData('data_gaslimit.json');
+            blobData = normalizeGasLimitData(blobData);
+
+            initCalculator(blobData);
+
+            const stats = calculateStats(blobData);
+            document.getElementById('currentCount').textContent = stats.current;
+            document.getElementById('currentMax').textContent = stats.max;
+
+            const ctx = document.getElementById('blobChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: blobData.map(d => {
+                        // Parse date as local time, not UTC
+                        const [year, month, day] = d.date.split('-');
+                        const date = new Date(year, month - 1, day);
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Gas Limit',
+                        data: blobData.map(d => d.target),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: blobData.map(d => d.projected ? '#fff' : '#10b981'),
+                        pointBorderColor: blobData.map(d => '#10b981'),
+                        pointBorderWidth: blobData.map(d => d.projected ? 3 : 2),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: 'y',
+                        segment: {
+                            borderDash: ctx => {
+                                const idx = ctx.p1DataIndex;
+                                // If either point is projected, make the segment dashed
+                                return (idx > 0 && (blobData[idx].projected || blobData[idx - 1].projected)) ? [5, 5] : undefined;
+                            }
+                        }
+                    }, {
+                        label: 'Max',
+                        data: blobData.map(d => d.max),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: blobData.map(d => d.projected ? '#fff' : '#3b82f6'),
+                        pointBorderColor: blobData.map(d => '#3b82f6'),
+                        pointBorderWidth: blobData.map(d => d.projected ? 3 : 2),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: 'y',
+                        segment: {
+                            borderDash: ctx => {
+                                const idx = ctx.p1DataIndex;
+                                // If either point is projected, make the segment dashed
+                                return (idx > 0 && (blobData[idx].projected || blobData[idx - 1].projected)) ? [5, 5] : undefined;
+                            }
+                        }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(context) {
+                                    const index = context[0].dataIndex;
+                                    // Parse date as local time, not UTC
+                                    const [year, month, day] = blobData[index].date.split('-');
+                                    const date = new Date(year, month - 1, day);
+                                    const upgradeName = blobData[index]['upgrade-name'];
+                                    const isProjected = blobData[index].projected;
+                                    return [
+                                        upgradeName + ' Upgrade' + (isProjected ? ' (Projected)' : ''),
+                                        date.toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric'
+                                        })
+                                    ];
+                                },
+                                label: function(context) {
+                                    const gasLimit = context.parsed.y;
+                                    const gasPerSecond = gasLimit / BLOCK_TIME_SECONDS;
+                                    const gasPerSecondM = gasPerSecond / 1000000;
+                                    return context.dataset.label + ': ' + formatGasNumber(gasLimit) + ' gas/block (' + gasPerSecondM.toFixed(2) + ' M gas/s)';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: false,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return formatGasNumber(value);
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Gas Limit per Block'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: false,
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            min: function(context) {
+                                // Match the min of the left axis
+                                return context.chart.scales.y.min;
+                            },
+                            max: function(context) {
+                                // Match the max of the left axis
+                                return context.chart.scales.y.max;
+                            },
+                            afterBuildTicks: function(scale) {
+                                // Filter out ticks that would be below 0.5 M gas/s
+                                scale.ticks = scale.ticks.filter(tick => {
+                                    const gasPerSecond = tick.value / BLOCK_TIME_SECONDS;
+                                    const gasPerSecondM = gasPerSecond / 1000000;
+                                    return gasPerSecondM >= 0.5;
+                                });
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    // Convert gas/block to M gas/s
+                                    const gasPerSecond = value / BLOCK_TIME_SECONDS;
+                                    const gasPerSecondM = gasPerSecond / 1000000;
+                                    return gasPerSecondM.toFixed(2) + ' M gas/s';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Throughput (M gas/s)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        const transferProfilesBlobs = [
+            { id: 'eth-transfer', label: 'ETH transfer', defaultSize: 120, notes: 'Optimistic rollup payment with shared sender and recipient metadata' },
+            { id: 'erc20-transfer', label: 'ERC-20 transfer', defaultSize: 160, notes: 'Token transfer including contract address and event data' },
+            { id: 'uniswap-trade', label: 'Uniswap trade', defaultSize: 360, notes: 'Single hop swap with routing metadata' }
+        ];
+
+        function calculateStatsBlobs(data) {
+            if (data.length === 0) return { current: '0', max: '0' };
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let currentTarget = 0, currentMax = 0;
+            for (const item of data) {
+                const [y, m, d] = item.date.split('-');
+                const upgradeDate = new Date(y, m - 1, d);
+                if (upgradeDate <= today && !item.projected) {
+                    currentTarget = item.target;
+                    currentMax = item.max;
+                }
+            }
+            return { current: String(currentTarget), max: String(currentMax) };
+        }
+
+        function initBlobChart(blobData) {
+            if (chartBlobs) {
+                chartBlobs.destroy();
+                chartBlobs = null;
+            }
+            const stats = calculateStatsBlobs(blobData);
+            document.getElementById('currentCountBlobs').textContent = stats.current;
+            document.getElementById('currentMaxBlobs').textContent = stats.max;
+            const ctx = document.getElementById('blobChartBlobs').getContext('2d');
+            chartBlobs = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: blobData.map(d => {
+                        const [y, m, day] = d.date.split('-');
+                        const date = new Date(y, m - 1, day);
+                        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    }),
+                    datasets: [{
+                        label: 'Target',
+                        data: blobData.map(d => d.target),
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: blobData.map(d => d.projected ? '#fff' : '#10b981'),
+                        pointBorderColor: blobData.map(d => '#10b981'),
+                        pointBorderWidth: blobData.map(d => d.projected ? 3 : 2),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: 'y',
+                        segment: { borderDash: function(ctx) { const idx = ctx.p1DataIndex; return (idx > 0 && (blobData[idx].projected || blobData[idx - 1].projected)) ? [5, 5] : undefined; } }
+                    }, {
+                        label: 'Max',
+                        data: blobData.map(d => d.max),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: blobData.map(d => d.projected ? '#fff' : '#3b82f6'),
+                        pointBorderColor: blobData.map(d => '#3b82f6'),
+                        pointBorderWidth: blobData.map(d => d.projected ? 3 : 2),
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        yAxisID: 'y',
+                        segment: { borderDash: function(ctx) { const idx = ctx.p1DataIndex; return (idx > 0 && (blobData[idx].projected || blobData[idx - 1].projected)) ? [5, 5] : undefined; } }
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: true, position: 'top', labels: { padding: 15, usePointStyle: true, font: { size: 12 } } },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            callbacks: {
+                                title: function(context) {
+                                    const i = context[0].dataIndex;
+                                    const [y, m, d] = blobData[i].date.split('-');
+                                    const date = new Date(y, m - 1, d);
+                                    return [blobData[i]['upgrade-name'] + ' Upgrade' + (blobData[i].projected ? ' (Projected)' : ''), date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })];
+                                },
+                                label: function(context) {
+                                    const blobs = context.parsed.y;
+                                    const kbps = ((blobs * BLOB_SIZE_BYTES) / 1024) / BLOCK_TIME_SECONDS;
+                                    const mbps = kbps / 1024;
+                                    return context.dataset.label + ': ' + blobs + ' blobs/block (' + kbps.toFixed(1) + ' KB/s, ' + mbps.toFixed(2) + ' MB/s)';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: false,
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { callback: v => v.toLocaleString() + ' blobs' },
+                            title: { display: true, text: 'Blobs per Block' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: false,
+                            grid: { drawOnChartArea: false },
+                            min: c => c.chart.scales.y.min,
+                            max: c => c.chart.scales.y.max,
+                            afterBuildTicks: function(scale) {
+                                scale.ticks = scale.ticks.filter(t => ((t.value * BLOB_SIZE_BYTES) / 1024) / BLOCK_TIME_SECONDS >= 20);
+                            },
+                            ticks: { callback: v => (((v * BLOB_SIZE_BYTES) / 1024) / BLOCK_TIME_SECONDS).toFixed(1) + ' KB/s' },
+                            title: { display: true, text: 'Throughput (KB/s)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initBlobCalculator(blobData) {
+            const milestoneSelect = document.getElementById('milestoneSelectBlobs');
+            const milestoneContext = document.getElementById('milestoneContextBlobs');
+            const blobSlider = document.getElementById('blobSliderBlobs');
+            const blobCountDisplay = document.getElementById('blobCountDisplayBlobs');
+            const throughputDisplay = document.getElementById('throughputDisplayBlobs');
+            const tableBody = document.getElementById('transferTableBodyBlobs');
+            if (!milestoneSelect || !blobSlider || !tableBody || !blobCountDisplay || !throughputDisplay) return;
+
+            milestoneSelect.innerHTML = '';
+            blobData.forEach((m, i) => {
+                const opt = document.createElement('option');
+                opt.value = String(i);
+                opt.textContent = m['upgrade-name'] + ' – ' + formatUpgradeDate(m.date) + (m.projected ? ' (projected)' : '');
+                milestoneSelect.appendChild(opt);
+            });
+            let defaultIndex = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            for (let i = blobData.length - 1; i >= 0; i--) {
+                const [y, m, d] = blobData[i].date.split('-');
+                if (new Date(y, m - 1, d) <= today) { defaultIndex = i; break; }
+            }
+            milestoneSelect.value = String(defaultIndex);
+
+            function updateBlobStatsDisplay() {
+                const blobsPerBlock = Number(blobSlider.value) || 0;
+                const bytesPerSecond = (blobsPerBlock * BLOB_SIZE_BYTES) / BLOCK_TIME_SECONDS;
+                const kb = bytesPerSecond / 1024, mb = kb / 1024;
+                blobCountDisplay.textContent = blobsPerBlock.toLocaleString() + ' blobs/block';
+                throughputDisplay.textContent = kb.toFixed(1) + ' KB/s (' + mb.toFixed(2) + ' MB/s)';
+            }
+            function updateBlobCalcs() {
+                const blobsPerBlock = Number(blobSlider.value) || 0;
+                const bytesPerSecond = (blobsPerBlock * BLOB_SIZE_BYTES) / BLOCK_TIME_SECONDS;
+                tableBody.querySelectorAll('tr').forEach(r => {
+                    const inp = r.querySelector('input[type="number"]');
+                    const out = r.querySelector('.tps-output');
+                    if (!inp || !out) return;
+                    const footprint = Number(inp.value);
+                    if (!footprint || footprint <= 0) { out.textContent = '—'; return; }
+                    const tps = bytesPerSecond / footprint;
+                    out.textContent = tps.toLocaleString(undefined, { minimumFractionDigits: tps >= 100 ? 0 : 1, maximumFractionDigits: tps >= 100 ? 0 : 1 }) + ' tx/s';
+                });
+            }
+            function applyContext() {
+                const sel = getSelectedMilestone(blobData, milestoneSelect.value);
+                if (milestoneContext) milestoneContext.textContent = sel ? (sel.projected ? 'Projected milestone based on roadmap targets.' : 'Live network milestone.') : 'Milestone data unavailable.';
+                const tb = document.querySelector('#content-blobs .preset-button[data-preset="target"]');
+                const mb = document.querySelector('#content-blobs .preset-button[data-preset="max"]');
+                if (sel) {
+                    if (tb) { tb.textContent = sel.target != null ? 'Target (' + sel.target + ' blobs)' : 'Target (n/a)'; tb.disabled = sel.target == null; }
+                    if (mb) { mb.textContent = sel.max != null ? 'Max (' + sel.max + ' blobs)' : 'Max (n/a)'; mb.disabled = sel.max == null; }
+                } else { if (tb) { tb.textContent = 'Target (n/a)'; tb.disabled = true; } if (mb) { mb.textContent = 'Max (n/a)'; mb.disabled = true; } }
+            }
+            function sliderFromMilestone() {
+                const sel = getSelectedMilestone(blobData, milestoneSelect.value);
+                if (!sel) return;
+                const ub = Math.max(Number(sel.target) || 1, Number(sel.max) || 0, 1);
+                blobSlider.min = '1';
+                blobSlider.max = String(Math.max(ub, Number(blobSlider.value) || 1));
+                blobSlider.step = '1';
+                blobSlider.value = String(Number(sel.target) || 1);
+                updateBlobStatsDisplay();
+                updateBlobCalcs();
+            }
+
+            tableBody.innerHTML = '';
+            transferProfilesBlobs.forEach(profile => {
+                const row = document.createElement('tr');
+                const scenarioCell = document.createElement('td');
+                scenarioCell.innerHTML = '<strong>' + profile.label + '</strong><div class="scenario-notes">' + profile.notes + '</div>';
+                const inputCell = document.createElement('td');
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.value = profile.defaultSize;
+                input.dataset.profileId = profile.id;
+                input.setAttribute('aria-label', profile.label + ' data footprint in bytes');
+                const tpsCell = document.createElement('td');
+                tpsCell.className = 'tps-output';
+                tpsCell.textContent = '—';
+                row.appendChild(scenarioCell);
+                inputCell.appendChild(input);
+                row.appendChild(inputCell);
+                row.appendChild(tpsCell);
+                tableBody.appendChild(row);
+                input.addEventListener('input', updateBlobCalcs);
+            });
+
+            blobSlider.addEventListener('input', () => { updateBlobStatsDisplay(); updateBlobCalcs(); });
+            milestoneSelect.addEventListener('change', () => { sliderFromMilestone(); applyContext(); });
+            document.querySelectorAll('#content-blobs .preset-button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sel = getSelectedMilestone(blobData, milestoneSelect.value);
+                    if (!sel) return;
+                    const val = btn.dataset.preset === 'target' ? sel.target : sel.max;
+                    if (val != null && Number.isFinite(Number(val))) {
+                        blobSlider.value = String(Number(val));
+                        updateBlobStatsDisplay();
+                        updateBlobCalcs();
+                    }
+                });
+            });
+
+            sliderFromMilestone();
+            applyContext();
+        }
+
+        let blobViewInited = false;
+        document.getElementById('tab-gas').addEventListener('click', () => {
+            document.getElementById('content-gas').classList.add('active');
+            document.getElementById('content-blobs').classList.remove('active');
+            document.getElementById('tab-gas').classList.add('active');
+            document.getElementById('tab-gas').setAttribute('aria-selected', 'true');
+            document.getElementById('tab-blobs').classList.remove('active');
+            document.getElementById('tab-blobs').setAttribute('aria-selected', 'false');
+        });
+        document.getElementById('tab-blobs').addEventListener('click', async () => {
+            document.getElementById('content-gas').classList.remove('active');
+            document.getElementById('content-blobs').classList.add('active');
+            document.getElementById('tab-blobs').classList.add('active');
+            document.getElementById('tab-blobs').setAttribute('aria-selected', 'true');
+            document.getElementById('tab-gas').classList.remove('active');
+            document.getElementById('tab-gas').setAttribute('aria-selected', 'false');
+            if (!blobViewInited) {
+                const blobData = await loadData('data_blobs.json');
+                initBlobChart(blobData);
+                initBlobCalculator(blobData);
+                blobViewInited = true;
+            }
+        });
+
+        initChart();
+    </script>
+</body>
+</html>

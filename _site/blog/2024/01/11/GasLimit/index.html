@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Why increasing the gas limit is difficult &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="In this post, we discuss why increasing the gas limit poses challenges for client developers and why a gas limit increase might be shortsighted at this point">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2024/01/11/GasLimit/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Why increasing the gas limit is difficult">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2024/01/11/GasLimit/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Why increasing the gas limit is difficult" />
+    <meta name="twitter:description" content="In this post, we discuss why increasing the gas limit poses challenges for client developers and why a gas limit increase might be shortsighted at this point" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2024/01/11/GasLimit/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Why increasing the gas limit is difficult</h1>
+  <span class="post-meta">Jan 11, 2024</span><br>
+  
+  <span class="post-meta small">
+  
+    8 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>This post was inspired by an answer Vitalik gave to a recent reddit AMA.
+I wrote a similar <a href="https://www.linkedin.com/pulse/why-raising-ethereums-gas-limit-dangerous-marius-van-der-wijden/">article</a> in 2021, but I update it for the new circumstances.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/vitalik_post.png" alt="Vitaliks answer" /></p>
+
+<h2 id="gas-limit">Gas Limit</h2>
+
+<p>The gas limit determines how much work can be done in a block, thus how many transactions can be executed per block.
+Raising the gas limit would result in Ethereum being able to handle a higher transaction throughput or more complex transactions.
+The gas limit is historically a number that the miners/stakers can influence and has been increased over the years.
+The following chart by etherscan.io shows the historical gas usage (which is very close to the gaslimit, since all gaslimit increases have been eaten up by the market).</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/gaslimit.png" alt="Historical Gas usage" /></p>
+
+<h2 id="risks">Risks</h2>
+
+<p>There are several risks associated with raising the gas limit right now.</p>
+
+<h3 id="missed-block-rate">Missed block rate</h3>
+
+<p>My previous article mentioned the uncle rate as one of the most discussed metrics when assessing a gas limit increase. Now, after the merge, we don’t have any uncles anymore. The only real way we can see if nodes are handling the current gas limit well is if we look at the rate of missed blocks. This is a flawed metric though, since it only shows us the nodes that are <em>currently</em> under-provisioned. It fails to give us a good indicator for a gas limit increase, also it only really shows the <em>average</em> case, not the worst case blocks that could happen during an attack.</p>
+
+<h3 id="state-size">State size</h3>
+
+<p>At block 18418786 (on 24.10.2023), the account snapshot was 10.33GB and the storage snapshot was 76.59GB, so the overall state was roughly 87GB. At block 17419840 (06.06.2023) the state was slightly less than 80GB. This would imply a state growth of roughly 7GB in 4 months or almost 2GB per month.</p>
+
+<p>If we were to extrapolate that with <code class="language-plaintext highlighter-rouge">87+(2*12*#years)</code>, the state will be 111GB in a year, 207 in five years. The problem here is not the size itself. Everyone will be able to store that amount of data, however accessing and modifying it will become slower and slower.</p>
+
+<p>And this is only the snapshot, which is the plain state. Geth needs to store this state in a different form as well in order to verify the state root. This other format (the trie nodes) needs roughly 180GB at block 18418786.</p>
+
+<p>Thus the total size of space needed <em>right now</em> is roughly 267GB only for the state. If we increase the gas limit, this size will grow even quicker.</p>
+
+<p>The problem with state growth is that, unlike history, we have no clear path to removing state. There are no concrete state-expiry proposals that we can quickly implement to get rid of the ever-growing state.</p>
+
+<h3 id="history-size">History size</h3>
+
+<p>In my previous post in February 2021, a full geth node was ~350GB (freshly pruned). Almost three years later a full geth node (on pbss) is over 900GB. 
+The following chart shows the cumulative number of transactions. It’s easy to see that the transaction count more than doubled in three years from roughly 980 million to over 2.2 billion transactions.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/transaction_count.png" alt="Cumulative number of transactions" /></p>
+
+<p>With the rise of L2s, the history size has become more of an problem since their way to store data right now (before 4844 goes live) is calldata. The bodies at block 18418786 were over 427GB at Block 17419840 (again 4 months earlier) they were 339GB, this implies a growth of 28GB in 4 months or roughly 9GB per month. 
+We can extrapolate this growth again with <code class="language-plaintext highlighter-rouge">427+(9*12*#years)</code> which is 535GB in a year, 967GB in five years (again assuming a linear growth).</p>
+
+<p>Hopefully with EIP-4844 this growth might slow down, since L2s will stop using CALLDATA (thus transaction size) for data availability and move to blobs which expire after a few weeks.</p>
+
+<p>EIP-4444 will solve the history growth problem since full nodes don’t need to store all of the history anymore. Implementing EIP-4444 requires a robust network for retrieving the history before we can allow full nodes to stop serving the history though.</p>
+
+<h3 id="sync-times">Sync times</h3>
+
+<p>The gas limit impacts sync times in multiple ways:</p>
+
+<ul>
+  <li>Full sync becomes way slower, it takes a geth node more than a week to fully sync the chain, other clients have optimized the full sync better</li>
+  <li>Syncing the history is slower. Because we need to download more data, the historical part of the sync is slower</li>
+  <li>Snap syncing the state is slower since we need to download more state</li>
+  <li>Snap healing is slower. Since the pivot point moves during snap sync, we have a lot of incomplete states on disk that need to be healed. This healing phase is slower if the pivot moves more often and if more changes are applied each block</li>
+  <li>Catching up with the chain is slower since a node needs to crank through more changes to get to the head</li>
+</ul>
+
+<h3 id="client-diversity">Client diversity</h3>
+
+<p>Building a new EL client is already a monumental task. Increasing the gas limit has the additional drawback that it makes building the client and optimizing it for mainnet use harder. Geth has had 10+ years of development which included a lot of optimizations. The counterargument here would be that new clients can learn from existing clients and not make the same mistakes.</p>
+
+<p>However we’re already seeing two clients (Execution Specs; a client written in python and EthereumJS a javascript client) struggle with mainnet. This also means that right now clients in certain languages are not possible anymore. Increasing the gas limit will make it harder for some clients to keep up simply because of language overhead and library maturity.</p>
+
+<p>We’ve also seen this with KZG, where in order to get the needed performance most clients rely on calls to C-KZG, a library written in C, instead of using a library written in their language of choice.</p>
+
+<h3 id="worst-case">Worst case</h3>
+
+<p>When thinking about the gas limit, we can not look at the average case. We always have to look at the worst case. Sure a node might chug along nicely when the chain has an average load, but what happens if all of a sudden the disk I/O is doubled for 5 blocks in a row? How will the network fare with 5 second blocks.</p>
+
+<p><em>edit: I removed a table at this point which showed runtimes of &gt;4 seconds for a full 30MGas block in older versions of clients under old chain rules</em></p>
+
+<p>The runtime is not the only metric that we need to look at, if an attacker could hog other resources, like disk i/o, cpu time or memory, they could force lower provisioned machines offline.
+Especially post-merge with two clients running on the same machine, attacking one could cause instability in the other client. In the early days of merge testing we saw this a few times where a memory leak in one client brought down the whole system.</p>
+
+<p>Another worst-case to consider is the proof size. With an increased gas limit, the number of potential state changes that can occur between two blocks increases. This has effects regarding the snap sync as discussed earlier, but it also impacts the size of the proof for execution layer light clients. This is not a big deal right now, since proofs for the merkle-patricia tree are too big already to send over the network. However if we want to implement the cross-validation idea of running multiple light clients on the same machine, the proof size starts to matter.</p>
+
+<h2 id="solutions">Solutions</h2>
+
+<p>Are we doomed? Will we always stay at a 30MGas limit? Not really!</p>
+
+<p>In my previous post from 2021 I proposed solutions for the problems we faced at that time.
+For the full sync issues we faced in 2021 geth implemented snap sync and snapshots. For the issues with pruning and the database layout, geth implemented PBSS. The Txpool got more robust at handling high transaction loads and the bulk of MEV frontrunning transactions moved to the builders. A lot of transactions also moved to L2s, which in turn increased the average size of transactions on mainnet.</p>
+
+<p>The only solution that was not implemented yet is regenesis. Over the years the viewpoints changed a bit and it looks like most people favor EIP-4444 history expiry for a short-term solution for history growth. For EIP-4444 to ship, we need a robust network of history serving nodes, so that the history does not get lost, even if it is not stored by every full node anymore (btw. most bitcoin nodes do not store the history at all).</p>
+
+<p>We still have not found a decent and realistically way for state expiry. There are a few interesting approaches, so I would encourage everyone who’s interested to join the <code class="language-plaintext highlighter-rouge">#state-expiry</code> on the Eth R&amp;D discord.</p>
+
+<p>As you’ve seen with the attack pre-shanghai, there were a few known attacks that prevented us from raising the gaslimit. All of them (to the best of my knowledge) have been fixed.</p>
+
+<p>At the time of this writing, EIP-4844 is being launched on testnets. This EIP will increase the storage and I/O requirements of a node. In my opinion it would be safest to wait for the fallout of this change on mainnet before attempting any type of gas limit increase. 
+Once L2s moved to Blob transactions, we should increase the cost of calldata (as calldata is underpriced compared to other things the data needs to store in my opinion). This would also serve as a forcing function for L2s to use blobspace.</p>
+
+<p>All in all I would like to caution everyone to tread carefully when considering gas limit increases as it effects many different areas of the node, some more obvious than others. And it is very important in this debate to consider the long and short-term effects of gas limit changes.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Solving Non-Attributable Faults or how to fix MEV &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="In this post we discuss Non-Attributable faults in data exchange and a protocol that can fix them. As well as a protocol for fixing the non-attributable fault inherent in the current MEV builder architecture.">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2023/07/16/Non-Attributable-Faults/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Solving Non-Attributable Faults or how to fix MEV">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2023/07/16/Non-Attributable-Faults/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Solving Non-Attributable Faults or how to fix MEV" />
+    <meta name="twitter:description" content="In this post we discuss Non-Attributable faults in data exchange and a protocol that can fix them. As well as a protocol for fixing the non-attributable fault inherent in the current MEV builder architecture." />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2023/07/16/Non-Attributable-Faults/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Solving Non-Attributable Faults or how to fix MEV</h1>
+  <span class="post-meta">Jul 16, 2023</span><br>
+  
+  <span class="post-meta small">
+  
+    6 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p><em>This post was inspired by the paper “FairSwap: How to fairly exchange digital goods” by Dziembowski et. al. (1).</em></p>
+
+<p>Many blockchain protocols suffer from an inherent non-attributable fault. Meaning a fault where the blame can not be attributed correctly.</p>
+
+<p>For example if I want to buy a piece of data from a merchant, everyone else (outside of the transacting parties) can not distinguish between two failure cases:</p>
+<ul>
+  <li>The merchant did not send the data</li>
+  <li>I received the data but claimed that I didn’t</li>
+</ul>
+
+<p>These issues can be solved by a mutually trusted intermediary that acts as an escrow service in order to facilitate the exchange.</p>
+
+<p>We can also construct a protocol that solves these faults in specific cases using smart contracts.</p>
+
+<h2 id="example-construction">Example construction</h2>
+
+<p>Suppose we have two players <code class="language-plaintext highlighter-rouge">A</code> and <code class="language-plaintext highlighter-rouge">B</code>.
+<code class="language-plaintext highlighter-rouge">A</code> has some data <code class="language-plaintext highlighter-rouge">data</code> that they want to sell to <code class="language-plaintext highlighter-rouge">B</code>.
+<code class="language-plaintext highlighter-rouge">B</code> only knows the <code class="language-plaintext highlighter-rouge">hash = h(data)</code> of the data (e.g. because the hash was notarized by a trusted authority). In this example we proof the claim that the data hashes to <code class="language-plaintext highlighter-rouge">hash</code>. We will see later that other claims about the data can be verified as well.</p>
+
+<ol>
+  <li>
+    <p>In the first step <code class="language-plaintext highlighter-rouge">A</code> encrypts <code class="language-plaintext highlighter-rouge">data</code> with key <code class="language-plaintext highlighter-rouge">key</code>:
+ <code class="language-plaintext highlighter-rouge">encData &lt;- ENC(data, key)</code>
+ and computes the hash of the encrypted data:
+ <code class="language-plaintext highlighter-rouge">hashEnc = h(encData)</code>
+ and the hash of the key:
+ <code class="language-plaintext highlighter-rouge">hashKey = h(key)</code>
+ Now <code class="language-plaintext highlighter-rouge">A</code> sends <code class="language-plaintext highlighter-rouge">{hash, hashEnc, hashKey}</code> to a smart contract and the encrypted data <code class="language-plaintext highlighter-rouge">encData</code> to <code class="language-plaintext highlighter-rouge">B</code>.</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">B</code> verifies that <code class="language-plaintext highlighter-rouge">hashEnc</code> matches the encrypted data they received.
+ <code class="language-plaintext highlighter-rouge">hashEnc' = h(encData'); if hashEnc' != hashEnc : abort</code>
+ <code class="language-plaintext highlighter-rouge">B</code> sends a conditional payment to the smart contract with the following conditions:
+    <ul>
+      <li>If <code class="language-plaintext highlighter-rouge">A</code> fails to send key <code class="language-plaintext highlighter-rouge">k</code> that matches <code class="language-plaintext highlighter-rouge">hashKey</code> within a time period, the payment is reverted</li>
+      <li>If <code class="language-plaintext highlighter-rouge">B</code> provides a valid fault proof within a time period, the payment is reverted</li>
+      <li>Otherwise the payment is executed and send to <code class="language-plaintext highlighter-rouge">A</code></li>
+    </ul>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">A</code> sends the key <code class="language-plaintext highlighter-rouge">key'</code> to the smart contract. The contract verifies that <code class="language-plaintext highlighter-rouge">h(key')</code> matches <code class="language-plaintext highlighter-rouge">hashKey</code>.</p>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">B</code> now takes the key <code class="language-plaintext highlighter-rouge">key</code> and decrypts the data they received:
+ <code class="language-plaintext highlighter-rouge">data' = DEC(encData, key)</code>
+ If the hash of the decrypted data matches the known <code class="language-plaintext highlighter-rouge">hash</code>, B terminates and the payment is executed.
+ If the hash does not match, <code class="language-plaintext highlighter-rouge">B</code> sends <code class="language-plaintext highlighter-rouge">data'</code> as a fault proof to the smart contract.
+ The smart contract verifies the fault proof and reverts the payment if the fault proof was correct.
+    <ul>
+      <li>It computes <code class="language-plaintext highlighter-rouge">encData'</code>= ENC(data’, key)`</li>
+      <li>and verifies that <code class="language-plaintext highlighter-rouge">h(encData') == hashEnc</code> and <code class="language-plaintext highlighter-rouge">h(data') != </code>h(data)`</li>
+    </ul>
+  </li>
+  <li>If the smart contract did not receive a fault proof within a certain timeout, the transaction is executed and the funds are unlocked for <code class="language-plaintext highlighter-rouge">A</code>.</li>
+</ol>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/non-attributable-fault.png" alt="Example Construction" /></p>
+
+<h3 id="extensions">Extensions</h3>
+
+<p>This example construction is simplified. In practice <code class="language-plaintext highlighter-rouge">data</code> can be quite large and publishing it on the blockchain in the case of a fault would be expensive. Thus the scheme can be easily extended to use merkle trees to keep the fault proof size low.</p>
+
+<h2 id="non-attributable-faults-in-mev">Non-Attributable Faults in MEV</h2>
+
+<p>There is an inherent non-attributable fault in the MEV supply chain. 
+Block producers pay validators to include their block. But validators have to take the word of block producers, that the block is correctly constructed and matches the blinded header that they receive first. This fault gave rise to a trusted intermediary, the relay, which connects validators and block producers and verifies that the blocks are created correctly (simplified, they also act as block producers themselves, bundling transactions from searchers).</p>
+
+<h3 id="construction">Construction</h3>
+
+<p>In the following construction, we shorten the validator to <code class="language-plaintext highlighter-rouge">V</code> and the block producer to <code class="language-plaintext highlighter-rouge">B</code>.
+Right now the bidding process is kinda backwards in my opinion. Instead of validators buying blocks, they sell block space. But we can easily redefine it. This has some implications on how blocks are constructed, because any MEV now needs to go to the validator instead of the block producer, but they pay for it.</p>
+
+<p>0.1 <code class="language-plaintext highlighter-rouge">V</code> solicits bids by announcing that they are eligible to create the next block.
+0.2 Block producers bid on the slot by announcing to <code class="language-plaintext highlighter-rouge">V</code> that they have a block with hash <code class="language-plaintext highlighter-rouge">hash</code> that pays the coinbase <code class="language-plaintext highlighter-rouge">value</code> ether in extracted MEV. They are willing to sell the block to <code class="language-plaintext highlighter-rouge">V</code> for <code class="language-plaintext highlighter-rouge">cost</code> ether. Thus <code class="language-plaintext highlighter-rouge">value - cost</code> is the profit for <code class="language-plaintext highlighter-rouge">V</code>, <code class="language-plaintext highlighter-rouge">cost</code> ist the profit for <code class="language-plaintext highlighter-rouge">B</code>. <code class="language-plaintext highlighter-rouge">V</code> chooses the block <code class="language-plaintext highlighter-rouge">n</code> that maximizes their <code class="language-plaintext highlighter-rouge">value - cost</code>.</p>
+
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">V</code> wants to buy block with hash <code class="language-plaintext highlighter-rouge">hash</code> from <code class="language-plaintext highlighter-rouge">B</code> and notifies <code class="language-plaintext highlighter-rouge">B</code> of its intention</li>
+  <li><code class="language-plaintext highlighter-rouge">B</code> sends <code class="language-plaintext highlighter-rouge">{hashEnc, hashKey, encData}</code> to <code class="language-plaintext highlighter-rouge">V</code></li>
+  <li><code class="language-plaintext highlighter-rouge">V</code> signs a transaction <code class="language-plaintext highlighter-rouge">tx</code> that will send <code class="language-plaintext highlighter-rouge">cost</code> eth to <code class="language-plaintext highlighter-rouge">B</code> iff
+    <ul>
+      <li>The preimage to <code class="language-plaintext highlighter-rouge">hashKey</code> was revealed within timeout</li>
+      <li>No fault proof was provided within timeout
+ <code class="language-plaintext highlighter-rouge">V</code> sends the transaction <code class="language-plaintext highlighter-rouge">{tx}</code> to <code class="language-plaintext highlighter-rouge">B</code></li>
+    </ul>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">B</code> verifies <code class="language-plaintext highlighter-rouge">tx</code> and sends <code class="language-plaintext highlighter-rouge">{key}</code> to <code class="language-plaintext highlighter-rouge">V</code></li>
+  <li><code class="language-plaintext highlighter-rouge">V</code> decrypts block <code class="language-plaintext highlighter-rouge">n</code>, signs it and sends it to the network</li>
+  <li><code class="language-plaintext highlighter-rouge">B</code> sends <code class="language-plaintext highlighter-rouge">tx</code> to the network</li>
+</ol>
+
+<h4 id="fault-proof-construction-i">Fault Proof Construction I</h4>
+
+<p>The fault proof works as follows:</p>
+
+<p><code class="language-plaintext highlighter-rouge">B</code> sends the following data <code class="language-plaintext highlighter-rouge">{txs, postState, difference}</code> to <code class="language-plaintext highlighter-rouge">A</code>.
+The fault proof contains <code class="language-plaintext highlighter-rouge">{preState, txs, postState, difference}</code>
+All transactions are simulated in the smart contract. The smart contract verifies a proof to account of <code class="language-plaintext highlighter-rouge">A</code> in the pre-state and the post-state.
+The fault proof is valid, if the difference between pre and post-state are unequal to the difference claimed by <code class="language-plaintext highlighter-rouge">B</code>.</p>
+
+<p>Problems:</p>
+
+<p>Simulating all transactions of a block within a smart contract is extremely costly and won’t work for big transaction bundles.</p>
+
+<p>Improvements:</p>
+<ul>
+  <li>Provide only the preStateHash and proofs to the preState.</li>
+  <li>Provide only the postStateHash and proofs to the postState.</li>
+  <li>Provide intermediate differences, so only one transaction needs to be simulated</li>
+</ul>
+
+<h4 id="fault-proof-construction-ii">Fault Proof Construction II</h4>
+
+<p>The fault proof contains <code class="language-plaintext highlighter-rouge">{preStateHash, tx, postStateHash, difference}</code>`.</p>
+
+<p>In this construction we only provide proofs to the preState, postState and one transaction.
+<code class="language-plaintext highlighter-rouge">B</code> needs to send the following data to <code class="language-plaintext highlighter-rouge">V</code>: <code class="language-plaintext highlighter-rouge">{preStateHash, tx_1, postStateHash_1, difference_1, ..., sumDifference}</code>.</p>
+
+<p>The fault proofs now has two parts:</p>
+<ol>
+  <li>if <code class="language-plaintext highlighter-rouge">B</code> claimed that <code class="language-plaintext highlighter-rouge">sumDifference</code> is higher/lower than <code class="language-plaintext highlighter-rouge">sum(difference_x)</code>:
+ <code class="language-plaintext highlighter-rouge">V</code> provides merkle proofs for <code class="language-plaintext highlighter-rouge">{difference_1, ..., sumDifference}</code> to the contract</li>
+  <li>if <code class="language-plaintext highlighter-rouge">B</code> claimed a wrong state transition of transaction with index i:
+ <code class="language-plaintext highlighter-rouge">V</code> provides merkle proofs for <code class="language-plaintext highlighter-rouge">{postStateHash_i-1, tx_i, postStateHash_i}</code> to the contract.</li>
+</ol>
+
+<p>Problems:</p>
+
+<p>Simulating a big transaction is already costly and might cost more than a full block itself.</p>
+
+<h3 id="conclusion">Conclusion</h3>
+
+<p>I think the only viable solution to proving transaction execution on chain is to merklelize the full transaction execution. So that every single operation is part of the proof only the state transition where <code class="language-plaintext highlighter-rouge">B</code> cheated has to be put on chain in order to proof the fault.
+I’m pretty sure that is exactly how fraud proofs for optimistic rollups work, so these schemes can probably be adapted to work with this.</p>
+
+<p>The only big open problem I see is that the transaction <code class="language-plaintext highlighter-rouge">tx</code> might not be valid at point 6 anymore, ideally it should be published beforehand. This would mean that the proposer would need to lock enough funds before his slot to pay out a (theoretically) unlimited bounty.</p>
+
+<p>Even if we can not solve the trustless data exchange in the case of MEV with this protocol, its still a neat technique that can be used to fairly exchange digital assets and thus should be part of the toolbox of every developer.</p>
+
+<p>(1) FairSwap: How to fairly exchange digital goods: https://eprint.iacr.org/2018/740.pdf</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

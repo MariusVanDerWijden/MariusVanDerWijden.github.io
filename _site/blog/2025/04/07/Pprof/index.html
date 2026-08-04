@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Profiling go-ethereum with PProf &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="This post explains some of the techniques that can be used to profile golang programs, especially go-ethereum and how to analyze the resulting traces.">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2025/04/07/Pprof/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Profiling go-ethereum with PProf">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2025/04/07/Pprof/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Profiling go-ethereum with PProf" />
+    <meta name="twitter:description" content="This post explains some of the techniques that can be used to profile golang programs, especially go-ethereum and how to analyze the resulting traces." />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2025/04/07/Pprof/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Profiling go-ethereum with PProf</h1>
+  <span class="post-meta">Apr 7, 2025</span><br>
+  
+  <span class="post-meta small">
+  
+    5 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p><a href="https://github.com/google/pprof">PProf</a> is a great tool to profile and analyze golang programs. 
+Go-ethereum has built in support to start a PProf server and to get both CPU and memory profiles. 
+These profiles are very useful in order to see hot spots that should be optimized. 
+PProf allows us to see where cpu time is spent and where memory is allocated and retained which allows to spot memory leaks quite easily.</p>
+
+<h1 id="profile">Profile</h1>
+
+<p>Profiling geth is very easy. You need to start geth with the <code class="language-plaintext highlighter-rouge">console</code> subcommand or connect to an existing geth instance e.g. with <code class="language-plaintext highlighter-rouge">geth attach /path/to/geth.ipc</code>.</p>
+
+<h2 id="memory">Memory</h2>
+
+<p>Once you are in the console, you can write out memory profiles with</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; debug.writeMemProfile("mem.pprof")
+</code></pre></div></div>
+
+<p>This will create a <code class="language-plaintext highlighter-rouge">mem.pprof</code> file in your current work directory that we can later analyze.
+The memory profile will contain information about all <em>current</em> active memory as well as where memory was allocated before.
+This is especially useful if you want to check where the node allocated memory over its lifetime.</p>
+
+<h2 id="cpu">CPU</h2>
+
+<p>CPU profiles are a bit more complicated than memory profiles.
+Since they use up significantly more resources, they need to be started and stopped manually.
+You can start and stop CPU profiles as follows:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; debug.startCPUProfile("cpu.pprof")
+...
+&gt; debug.stopCPUProfile()
+</code></pre></div></div>
+
+<p>This will spit out <code class="language-plaintext highlighter-rouge">cpu.pprof</code> in your current working directory. 
+This profile will contain all events that happened between starting and stopping the profile, so you should make sure to run it for a significant amount of time to capture enough events.</p>
+
+<h2 id="pprof-server">PProf server</h2>
+
+<p>If you specify the <code class="language-plaintext highlighter-rouge">--pprof</code> flag when starting the geth node, it will start a PProf server which can be used to dump the current goroutines, heap and allocation profiles and active mutexes.
+The node will print out where the PProf server is located (default: <code class="language-plaintext highlighter-rouge">127.0.0.1:6060</code>).
+However I found the PProf server to be less useful than dumping out the profiles via the console and analyzing them by hand.</p>
+
+<h1 id="analyze">Analyze</h1>
+
+<p>Once you collected we collected our profiles, we can start analyzing them.
+The profiles contain information about where in the code an event happened, but in order to properly analyze them, we need to start our analyzer in the same directory that contains our source code.</p>
+
+<p>So within the <code class="language-plaintext highlighter-rouge">go-ethereum</code> directory, you can run the interactive profiler with:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>go tool pprof --cum cpu.pprof
+</code></pre></div></div>
+<p>The flag <code class="language-plaintext highlighter-rouge">--cum</code> will order the profile by cumulative time spent, if you remove this flag, the profile will be ordered by their own weight.</p>
+
+<p>With <code class="language-plaintext highlighter-rouge">topN</code> you can list the top <code class="language-plaintext highlighter-rouge">N</code> functions, e.g.:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(pprof) top5
+Showing nodes accounting for 0.01s, 0.0018% of 545.55s total
+Dropped 2236 nodes (cum &lt;= 2.73s)
+Showing top 5 nodes out of 327
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%    223.08s 40.89%  github.com/ethereum/go-ethereum/eth/downloader.(*Downloader).spawnSync.func1
+         0     0%     0%    222.84s 40.85%  github.com/ethereum/go-ethereum/core.(*BlockChain).InsertChain
+     0.01s 0.0018% 0.0018%    222.84s 40.85%  github.com/ethereum/go-ethereum/core.(*BlockChain).insertChain
+         0     0% 0.0018%    222.84s 40.85%  github.com/ethereum/go-ethereum/eth/downloader.(*Downloader).importBlockResults
+         0     0% 0.0018%    222.84s 40.85%  github.com/ethereum/go-ethereum/eth/downloader.(*Downloader).processFullSyncContent
+</code></pre></div></div>
+
+<p>If you want to go deeper into a function, you can use <code class="language-plaintext highlighter-rouge">list functionName</code> to zoom into it:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>(pprof) list ApplyTransactionWithEVM
+Total: 545.55s
+ROUTINE ======================== github.com/ethereum/go-ethereum/core.ApplyTransactionWithEVM in github.com/ethereum/go-ethereum/core/state_processor.go
+      10ms    190.22s (flat, cum) 34.87% of Total
+         .          .    135:func ApplyTransactionWithEVM(msg *Message, gp *GasPool, statedb *state.StateDB, blockNumber *big.Int, blockHash common.Hash, tx *types.Transaction, usedGas *uint64, evm *vm.EVM) (receipt *types.Receipt, err error) {
+         .          .    136:	if hooks := evm.Config.Tracer; hooks != nil {
+         .          .    137:		if hooks.OnTxStart != nil {
+         .          .    138:			hooks.OnTxStart(evm.GetVMContext(), tx, msg.From)
+         .          .    139:		}
+         .          .    140:		if hooks.OnTxEnd != nil {
+         .          .    141:			defer func() { hooks.OnTxEnd(receipt, err) }()
+         .          .    142:		}
+         .          .    143:	}
+         .          .    144:	// Apply the transaction to the current state (included in the env).
+         .    186.80s    145:	result, err := ApplyMessage(evm, msg, gp)
+         .          .    146:	if err != nil {
+         .          .    147:		return nil, err
+         .          .    148:	}
+         .          .    149:	// Update the state with pending changes.
+         .          .    150:	var root []byte
+         .       10ms    151:	if evm.ChainConfig().IsByzantium(blockNumber) {
+         .      1.26s    152:		evm.StateDB.Finalise(true)
+         .          .    153:	} else {
+         .          .    154:		root = statedb.IntermediateRoot(evm.ChainConfig().IsEIP158(blockNumber)).Bytes()
+         .          .    155:	}
+         .          .    156:	*usedGas += result.UsedGas
+         .          .    157:
+         .          .    158:	// Merge the tx-local access event into the "block-local" one, in order to collect
+         .          .    159:	// all values, so that the witness can be built.
+         .          .    160:	if statedb.GetTrie().IsVerkle() {
+         .          .    161:		statedb.AccessEvents().Merge(evm.AccessEvents)
+         .          .    162:	}
+         .          .    163:
+      10ms      2.15s    164:	return MakeReceipt(evm, result, statedb, blockNumber, blockHash, tx, *usedGas, root), nil
+         .          .    165:}
+</code></pre></div></div>
+
+<p>Here you can see that ~34% of all cpu time in the profile is spent during block processing. 180 seconds are spent during evm execution while 2.15 seconds are spent making the receipts.</p>
+
+<p>You can also visualize important areas with <code class="language-plaintext highlighter-rouge">web ApplyTransactionWithEVM</code> which opens an svg file in your web browser that focuses on the function you want to visualize and everything that interacts with it.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/pprof-graph.png" alt="Web visualization" /></p>
+
+<h2 id="options">Options</h2>
+
+<p>As already described previously, the most important option is probably <code class="language-plaintext highlighter-rouge">--cum</code>.
+When analyzing memory profiles, you can switch between four different options in the interactive mode:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">inuse_space</code> shows you where the currently in use space was allocated, useful for finding memory leaks</li>
+  <li><code class="language-plaintext highlighter-rouge">alloc_space</code> shows you where space was allocated, not very useful</li>
+  <li><code class="language-plaintext highlighter-rouge">inuse_objects</code> shows you where the currently live objects were allocated, not very useful</li>
+  <li><code class="language-plaintext highlighter-rouge">alloc_objects</code> shows you where objects where allocated, very useful for performance optimization.</li>
+</ul>
+
+<p>As described, <code class="language-plaintext highlighter-rouge">alloc_objects</code> is the most useful option for memory profiles as it shows you where objects were allocated on the heap during the test. Heap allocations are comparatively slow and allocating a bunch of small objects also has the additional overhead of inducing a lot of work for the garbage collector. 
+Using <code class="language-plaintext highlighter-rouge">alloc_objects</code> to profile the code can also show instances where objects that intuitively should be allocated on the stack might escape to the heap. Often a small refactor will improve things greatly there.</p>
+
+<h1 id="datasets">Datasets</h1>
+
+<p>I’ve compiled two datasets <a href="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/mem.pprof">mem.pprof</a> and <a href="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/cpu2.pprof">cpu2.pprof</a> from my mainnet node that was stopped for almost two months and full synced up to the head during those benchmarks for anyone who’s interested in geth’s syncing performance.</p>
+
+<p>At the time of writing this blog post, I have had no time to look into them myself to see if there are any juicy improvements to be made to go-ethereum.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

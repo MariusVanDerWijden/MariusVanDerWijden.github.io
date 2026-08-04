@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Changes needed for the merge &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A list of all changes needed for the merge to happen">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2021/11/07/GethTODO/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Changes needed for the merge">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2021/11/07/GethTODO/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Changes needed for the merge" />
+    <meta name="twitter:description" content="A list of all changes needed for the merge to happen" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2021/11/07/GethTODO/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Changes needed for the merge</h1>
+  <span class="post-meta">Nov 7, 2021</span><br>
+  
+  <span class="post-meta small">
+  
+    2 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>Chris Hobcroft asked me today about the changes in go-ethereum that are needed for the merge.
+And I promised to compile a list. So here we go:</p>
+
+<h3 id="update-to-amphora-spec">Update to amphora spec</h3>
+<p>Our master branch still contains the changes from the rayonism hackathon.
+There’s a branch dormant to update the engine API to the Amphora spec.
+The PR for that is here: <a href="https://github.com/ethereum/go-ethereum/pull/23761">https://github.com/ethereum/go-ethereum/pull/23761</a></p>
+
+<h3 id="update-to-kintsugi-v100-alpha4">Update to kintsugi v.1.0.0-alpha.4</h3>
+<p>After we merged the updates to Amphora, we need to update to the new Kintsugi spec.
+Doing it in two steps reduces the cognitive load on the reviewer.
+The PR for that is here: <a href="https://github.com/MariusVanDerWijden/go-ethereum/pull/29">https://github.com/MariusVanDerWijden/go-ethereum/pull/29</a></p>
+
+<h3 id="refactor-the-downloader">Refactor the downloader</h3>
+<p>One change that needs to go in soon is the refactor of the downloader.
+Since we dropped old eth protocols (&lt;eth/66) we can simplify the downloader.
+The PR for that is here: <a href="https://github.com/ethereum/go-ethereum/pull/23576">https://github.com/ethereum/go-ethereum/pull/23576</a></p>
+
+<h3 id="implement-the-reverse-header-sync">Implement the Reverse Header Sync</h3>
+<p>Post-merge we will sync the headerchain from head back to genesis, since the head is decided by the beacon chain not by difficulty.
+The Reverse Header Sync was already implemented for the Amphora testnets.
+So the changes need to be rebased once the downloader refactor goes in.
+A commit implementing it can be found here: <a href="https://github.com/karalabe/go-ethereum/commit/93a1074787aaee18160f7c7d05aa169cde9f91cb">https://github.com/karalabe/go-ethereum/commit/93a1074787aaee18160f7c7d05aa169cde9f91cb</a></p>
+
+<h3 id="implement-support-for-eip-4399">Implement support for EIP-4399</h3>
+<p>The only significant EIP going into the merge fork is EIP-4399 exposing the RANDOM opcode to the EVM.
+The data for that is passed to the EL by the consensus layer client.
+The PR for that is here: <a href="https://github.com/MariusVanDerWijden/go-ethereum/pull/30">https://github.com/MariusVanDerWijden/go-ethereum/pull/30</a></p>
+
+<h3 id="extend-the-state-test-format-for-post-merge-tests">Extend the state test format for post-merge tests</h3>
+<p>The state test format defines a common format which is used to test that different implementations of ethereum compute the same state.
+The format needs to be extended for EIP-4399 and other post-merge tests
+PR for EIP-4399: <a href="https://github.com/MariusVanDerWijden/go-ethereum/pull/30">https://github.com/MariusVanDerWijden/go-ethereum/pull/30</a>
+Great project by Mario Vega to run engine api vectors: <a href="https://github.com/marioevz/kintsugi_testing">https://github.com/marioevz/kintsugi_testing</a></p>
+
+<h3 id="fuzzing-the-engine-api">Fuzzing the Engine API</h3>
+<p>It is important that all execution layer clients behave identically when called from the engine API.
+Thus I created merge-fuzz to differential fuzz different clients against each other.
+Repo: <a href="https://github.com/MariusVanDerWijden/merge-fuzz">https://github.com/MariusVanDerWijden/merge-fuzz</a></p>
+
+<h3 id="add-pairing-tests-to-hive">Add pairing tests to Hive</h3>
+<p>Hive is a tool that continuously tests the ethereum implementations for regressions.
+It also tests if different implementations can connect to each other and sync from each other.
+This is really important as it can find problems really quickly.
+PR to add post-merge testing to Hive: <a href="https://github.com/ethereum/hive/pull/481">https://github.com/ethereum/hive/pull/481</a></p>
+
+<h3 id="manual-testing">Manual testing</h3>
+<p>In addition to a lot of automatic testing, a lot of manual testing has to be performed.
+Once the longer running testnets are launched (end of November) <strong>you</strong> can help.
+Just running a node on one of the merge testnets and providing feedback to the client teams is incredibly valuable
+I’ve written down some ideas I had which we should test here: <a href="https://hackmd.io/z2h_RAJoTHWSRka-9MDEVg">https://hackmd.io/z2h_RAJoTHWSRka-9MDEVg</a></p>
+
+<h3 id="1000-other-small-things">1000 other small things</h3>
+<p>There are incredibly many small things that still need to be done before we’re ready to merge.
+But we’re working on it, day and night, tirelessly to merge as soon as possible without compromising the security of ethereum!</p>
+
+<p>Here is another checklist that is being worked on with some more technical details: <a href="https://github.com/ethereum/pm/blob/master/Merge/mainnet-readiness.md">https://github.com/ethereum/pm/blob/master/Merge/mainnet-readiness.md</a>.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

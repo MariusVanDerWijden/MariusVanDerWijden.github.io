@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Responsible disclosure is dead, long live responsible disclosure &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="In the advent of AI, responsible disclosure has become more important and critical.">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2026/08/04/Security/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Responsible disclosure is dead, long live responsible disclosure">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2026/08/04/Security/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Responsible disclosure is dead, long live responsible disclosure" />
+    <meta name="twitter:description" content="In the advent of AI, responsible disclosure has become more important and critical." />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2026/08/04/Security/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Responsible disclosure is dead, long live responsible disclosure</h1>
+  <span class="post-meta">Aug 4, 2026</span><br>
+  
+  <span class="post-meta small">
+  
+    4 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>In the advent of AI, responsible disclosure has become more important and critical.
+AI allows to reproduce and uncover issues quicker and shortens the time a bug can stay hidden.
+It also enables a motivated attacker to easily monitor releases of critical software and their dependencies for hidden bug fixes and frontrun deployments.
+Therefore we must adapt our disclosure and patch processes, especially for Ethereum mainnet.</p>
+
+<h2 id="ethereums-special-challenges">Ethereum’s special challenges</h2>
+
+<p>The Ethereum ecosystem is special in that we have multiple implementations in many different languages that are all open source.
+We have libraries that are shared by multiple clients on one layer (All CL clients need a BLS library) and across layers (e.g. Prysm &amp; Geth both written in golang, share stdlib).
+And Ethereum secures hundreds of billions of dollars of value, which creates a direct incentive for attackers.</p>
+
+<p>There are many downstream projects that work on forks of clients.
+These projects also rely on client teams for security updates and coordination around disclosures.
+And there is no direct relationship with our users. Since its a permissionless system, we don’t know who needs to be reminded about releases.</p>
+
+<p>Additionally clients are very complex pieces of software that depend on a lot of different libraries and dependencies that can be very critical.</p>
+
+<h2 id="disclosure-process-in-the-past">Disclosure process in the past</h2>
+
+<p>Previously we often fixed bugs in private and hid the patches in unrelated refactors in order to throw attackers off.
+This worked quite well, we would smuggle in patches at the last second before we cut the release and suggest users to quickly update.</p>
+
+<p>At some point we realized that we needed to share patches with our downstream dependents.
+L2s and other L1s that forked the go-ethereum code base were frequently subject to the same bugs as us.
+We didn’t want to be kingmakers and pull favorites, so pre-sharing the patches wouldn’t work for us.
+So we decided to adapt the process, so we would pre-announce to a trusted pool of downstream projects that there will be a release soon with some security critical patches.
+This allows downstream projects to prepare a release and reduce the time for them to release.</p>
+
+<p>Previously we also assumed that a bug in a single client will not affect other clients with different libraries. 
+So we usually fixed clients one by one. An attacker with AI can now feed all previous found bugs and thus will be able to find similar bugs in the other codebases as well, so we need higher coordination efforts.</p>
+
+<h2 id="new-processes">New processes</h2>
+
+<p>We are currently working on new processes for responsible disclosure (which also sparked the idea for this post).
+There are multiple challenges with the past processes that we would like to address:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Problem</th>
+      <th>Proposed Solution</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>There is little knowledge sharing between upstream and forks</td>
+      <td>Set up dedicated channels between upstream and forks</td>
+    </tr>
+    <tr>
+      <td>The turnaround time for users to update is too high</td>
+      <td>Setting up a dedicated mailing list for clients to share updates</td>
+    </tr>
+    <tr>
+      <td>No connection between clients and dependencies</td>
+      <td>Set up dedicated channels to maintainers of dependencies</td>
+    </tr>
+    <tr>
+      <td>Bugs in one client might affect another client</td>
+      <td>Set up a database of previously found bugs</td>
+    </tr>
+    <tr>
+      <td>Coordination between multiple client teams is hard</td>
+      <td>New security-team internal guidelines on coordination</td>
+    </tr>
+    <tr>
+      <td>Release coordination between dependencies and client teams</td>
+      <td>New security-team internal guidelines on coordination</td>
+    </tr>
+    <tr>
+      <td>Release coordination between clients and dependents (L2s, etc.)</td>
+      <td>New security-team internal guidelines on coordination</td>
+    </tr>
+    <tr>
+      <td>Enforcement of release embargos</td>
+      <td>Internal list of dependencies/players that have broken embargo (¹)</td>
+    </tr>
+    <tr>
+      <td>Coordination in the event of a live emergency</td>
+      <td>New security-team internal guidelines and playbooks</td>
+    </tr>
+    <tr>
+      <td>Regression tests not added to clients</td>
+      <td>Database for regression tests and when they can be added into client databases</td>
+    </tr>
+    <tr>
+      <td>Visibility into how many % of the network has updated</td>
+      <td>Promotion of things like https://lab.ethpandaops.io/xatu/contributors</td>
+    </tr>
+    <tr>
+      <td>Inconsistent CVE policy across clients</td>
+      <td>Standardized guidelines when and how a CVE should be applied for</td>
+    </tr>
+    <tr>
+      <td>Timelines for fixes differ greatly between clients</td>
+      <td>Clearer SLAs for how timelines look from submission via bug bounty to release and disclosure</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>(¹) This has only happened twice in the last 6+ years as far as I’m aware. This needs to be paired with clear guidelines on how partners will handle issues.</p>
+
+<h2 id="closing-notes">Closing notes</h2>
+
+<p>Over the last few months it became quite clear that traditional security and disclosure processes are outdated in a world with AI. 
+Even small motivated attackers can leverage the power of AI to find and exploit issues in a decentralized system and in open source software quite easily.</p>
+
+<p>AI also speeds up security work and leads to a flood of new bugs and issues, which in turn can create a fatigue in fixing and disclosing bugs. For instance a recent release of Nethermind fixed 17(!) CVEs.</p>
+
+<p>Similar to software development and security work, disclosure processes have to change as well and be much faster than before.
+We can no longer hide security fixes and have to assume that someone is letting their AI comb through every single commit on our open source repos. Additionally once a vulnerability is found by an LLM, the chance for it to be found by someone else increases significantly, which again shortens the time we have for releasing a fix.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

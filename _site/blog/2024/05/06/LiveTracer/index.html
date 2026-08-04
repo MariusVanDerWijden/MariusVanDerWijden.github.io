@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>The go-ethereum live tracer &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="In this post, I share an example tracer built which logs all transactions that concern your address (both ETH transfers and token transfers)">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2024/05/06/LiveTracer/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="The go-ethereum live tracer">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2024/05/06/LiveTracer/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="The go-ethereum live tracer" />
+    <meta name="twitter:description" content="In this post, I share an example tracer built which logs all transactions that concern your address (both ETH transfers and token transfers)" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2024/05/06/LiveTracer/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>The go-ethereum live tracer</h1>
+  <span class="post-meta">May 6, 2024</span><br>
+  
+  <span class="post-meta small">
+  
+    4 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>We recently merged a long awaited update for our tracing infrastructure into geth. 
+Sina Mahmoodi has been working on it for quite some time and since I was busy with other stuff, 
+I hadn’t had the time to really look into it. 
+So today I decided to check the new live tracing framework out and build a small tracer to showcase its capabilities.</p>
+
+<p>Our <a href="https://geth.ethereum.org/docs/developers/evm-tracing/live-tracing">website</a> has a short tutorial for building live tracers and there’s a no-op tracer in the code that can be used as a template.</p>
+
+<p>The tracer I build collects all transactions that concern a set of addresses. This is particularly useful if you want to see all transactions that send or received funds from your addresses. There are other solutions to this, mainly by looking at the receipts and direct transfers, but this will miss some sources of funds (selfdestructs, nested transfers, …).</p>
+
+<p>If you want to be 100% accurrate you need to look at all balance changes of your address and at all storage slots that correspond to your address of all contracts. However since the layout of mappings in solidity is quite complex, I decided not to be 100% accurate and omit tokens that do not emit events.</p>
+
+<h1 id="the-tracer">The tracer</h1>
+<p>Once you copied the tracer code (in the Appendix) to <code class="language-plaintext highlighter-rouge">eth/tracers/live/address.go</code> and rebuild geth, you can run the live tracer with the command <code class="language-plaintext highlighter-rouge">./build/bin/geth --vmtrace "address" --vmtrace.jsonconfig '{"path":".", "addresses":["0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D"]}'</code></p>
+
+<p>There are some caveats with this basic tracer though, balance changes can be reverted if a transaction reverts and it does only pick up on very specific events from ERC-20 contracts. It does not correctly track non-standard tokens. Also the tracer will overwrite any existing csv files on startup.</p>
+
+<h2 id="output">Output</h2>
+
+<p>The tracer will output CSV files for every address you specified in the config. 
+The CSV files look like this:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>TxHash,Sender,Currency,Previous,New,Reason
+0x48791fbdfcdfb63c4e1c424eeeb4c1cbbb635acc96339da79988b255caf91f7c,0x75a8326d027C65F9Db2d973Eb736D3c8127F7da7,ETH,0,10000000000000000000000000,10
+0x8f7f0a2c61de8ac4f1985085c01c895c02bdd729fb5373b2ff32abacaa6f220a,0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D,ETH,10000000000000000000000000,9999999999985924314901000,6
+0x8f7f0a2c61de8ac4f1985085c01c895c02bdd729fb5373b2ff32abacaa6f220a,0xb02A2EdA1b317FBd16760128836B0Ac59B560e9D,ETH,9999999999985924314901000,9999999994985924314901000,10
+0x908406379a3416aeeab318ca9b9f1ee644301bfa37b89c0668aabe53b926446b,
+</code></pre></div></div>
+<p>and can be consumed by all programs that use CSV (like Excel/Libreoffice).</p>
+
+<p>The log reason can be decoded using the declarations in <code class="language-plaintext highlighter-rouge">core/tracing/hooks.go</code></p>
+
+<h1 id="conclusion">Conclusion</h1>
+
+<p>Building a custom live tracer has never been easier (or more fun). The framework allows for creating hooks into multiple different levels, from the block level (with OnBlockStart, OnBlockEnd), via the transaction level (OnTxStart, OnTxEnd) and the call level (OnEnter, OnExit) down to the Opcode level (OnOpcode). 
+This allows developers to create complex tracers for their tracing needs.</p>
+
+<p>The tracers are run continuously during block processing and thus can be used for creating custom indizes for the blockchain. The examples for this are endless, you can create a database of all users that interacted with your contract or you can log events for interactions that don’t emit events, writing indexers for ordinal type systems becomes a breeze.</p>
+
+<p>Overall its a super nice way in my opinion to build custom tracers.
+Kudos to @sina_mahmoodi for creating this framework.</p>
+
+<p>Theres more documentation for the live tracer on our website: https://geth.ethereum.org/docs/developers/evm-tracing/live-tracing</p>
+
+<h1 id="appendix">Appendix</h1>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">package</span> <span class="n">live</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"encoding/csv"</span>
+	<span class="s">"encoding/json"</span>
+	<span class="s">"fmt"</span>
+	<span class="s">"math/big"</span>
+	<span class="s">"os"</span>
+
+	<span class="s">"github.com/ethereum/go-ethereum/accounts/abi"</span>
+	<span class="s">"github.com/ethereum/go-ethereum/common"</span>
+	<span class="s">"github.com/ethereum/go-ethereum/core/tracing"</span>
+	<span class="s">"github.com/ethereum/go-ethereum/core/types"</span>
+	<span class="s">"github.com/ethereum/go-ethereum/crypto"</span>
+	<span class="s">"github.com/ethereum/go-ethereum/eth/tracers"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">init</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">tracers</span><span class="o">.</span><span class="n">LiveDirectory</span><span class="o">.</span><span class="n">Register</span><span class="p">(</span><span class="s">"address"</span><span class="p">,</span> <span class="n">newAddressTracer</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c">// addressTracer is a live tracer that tracks all transactions that an address was involved in.</span>
+<span class="k">type</span> <span class="n">addressTracer</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">addresses</span> <span class="p">[]</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span>
+	<span class="n">writer</span>    <span class="k">map</span><span class="p">[</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">]</span><span class="o">*</span><span class="n">csv</span><span class="o">.</span><span class="n">Writer</span>
+
+	<span class="n">currentHash</span>   <span class="n">common</span><span class="o">.</span><span class="n">Hash</span>
+	<span class="n">currentSender</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span>
+<span class="p">}</span>
+
+<span class="k">type</span> <span class="n">addressTracerConfig</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">Path</span>      <span class="kt">string</span>   <span class="s">`json:"path"`</span>      <span class="c">// Path to the directory where the tracer logs will be stored</span>
+	<span class="n">Addresses</span> <span class="p">[]</span><span class="kt">string</span> <span class="s">`json:"addresses"`</span> <span class="c">// Addresses to be watched</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">newAddressTracer</span><span class="p">(</span><span class="n">cfg</span> <span class="n">json</span><span class="o">.</span><span class="n">RawMessage</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">tracing</span><span class="o">.</span><span class="n">Hooks</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">var</span> <span class="n">config</span> <span class="n">addressTracerConfig</span>
+	<span class="k">if</span> <span class="n">cfg</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">json</span><span class="o">.</span><span class="n">Unmarshal</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">config</span><span class="p">);</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span><span class="s">"failed to parse config: %v"</span><span class="p">,</span> <span class="n">err</span><span class="p">)</span>
+		<span class="p">}</span>
+		<span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">Path</span> <span class="o">==</span> <span class="s">""</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span><span class="s">"no path provided"</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+
+	<span class="k">var</span> <span class="p">(</span>
+		<span class="n">addresses</span> <span class="p">[]</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span>
+		<span class="n">writer</span>    <span class="o">=</span> <span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">]</span><span class="o">*</span><span class="n">csv</span><span class="o">.</span><span class="n">Writer</span><span class="p">)</span>
+	<span class="p">)</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">config</span><span class="o">.</span><span class="n">Addresses</span> <span class="p">{</span>
+		<span class="n">a</span> <span class="o">:=</span> <span class="n">common</span><span class="o">.</span><span class="n">HexToAddress</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+		<span class="n">addresses</span> <span class="o">=</span> <span class="nb">append</span><span class="p">(</span><span class="n">addresses</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+		<span class="n">file</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">os</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="s">"%v/%v.csv"</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="n">addr</span><span class="p">))</span>
+		<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+		<span class="p">}</span>
+		<span class="n">writer</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">NewWriter</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+		<span class="n">writer</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">Write</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span>
+			<span class="s">"TxHash"</span><span class="p">,</span>
+			<span class="s">"Sender"</span><span class="p">,</span>
+			<span class="s">"Currency"</span><span class="p">,</span>
+			<span class="s">"Previous"</span><span class="p">,</span>
+			<span class="s">"New"</span><span class="p">,</span>
+			<span class="s">"Reason"</span><span class="p">,</span>
+		<span class="p">})</span>
+		<span class="n">writer</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
+	<span class="p">}</span>
+
+	<span class="n">t</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="n">addressTracer</span><span class="p">{</span>
+		<span class="n">addresses</span><span class="o">:</span> <span class="n">addresses</span><span class="p">,</span>
+		<span class="n">writer</span><span class="o">:</span>    <span class="n">writer</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">tracing</span><span class="o">.</span><span class="n">Hooks</span><span class="p">{</span>
+		<span class="n">OnTxStart</span><span class="o">:</span>       <span class="n">t</span><span class="o">.</span><span class="n">OnTxStart</span><span class="p">,</span>
+		<span class="n">OnBalanceChange</span><span class="o">:</span> <span class="n">t</span><span class="o">.</span><span class="n">OnBalanceChange</span><span class="p">,</span>
+		<span class="n">OnStorageChange</span><span class="o">:</span> <span class="n">t</span><span class="o">.</span><span class="n">OnStorageChange</span><span class="p">,</span>
+	<span class="p">},</span> <span class="no">nil</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span><span class="n">addressTracer</span><span class="p">)</span> <span class="n">OnTxStart</span><span class="p">(</span><span class="n">vm</span> <span class="o">*</span><span class="n">tracing</span><span class="o">.</span><span class="n">VMContext</span><span class="p">,</span> <span class="n">tx</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Transaction</span><span class="p">,</span> <span class="n">from</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">t</span><span class="o">.</span><span class="n">currentHash</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">Hash</span><span class="p">()</span>
+	<span class="n">t</span><span class="o">.</span><span class="n">currentSender</span> <span class="o">=</span> <span class="n">from</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span><span class="n">addressTracer</span><span class="p">)</span> <span class="n">OnBalanceChange</span><span class="p">(</span><span class="n">a</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="nb">new</span> <span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">,</span> <span class="n">reason</span> <span class="n">tracing</span><span class="o">.</span><span class="n">BalanceChangeReason</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">addresses</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">addr</span> <span class="o">==</span> <span class="n">a</span> <span class="p">{</span>
+			<span class="n">t</span><span class="o">.</span><span class="n">writeRecord</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="s">"ETH"</span><span class="p">,</span> <span class="n">prev</span><span class="o">.</span><span class="n">String</span><span class="p">(),</span> <span class="nb">new</span><span class="o">.</span><span class="n">String</span><span class="p">(),</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Sprint</span><span class="p">(</span><span class="n">reason</span><span class="p">))</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">var</span> <span class="p">(</span>
+	<span class="n">transferTopic</span>   <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">Keccak256Hash</span><span class="p">([]</span><span class="kt">byte</span><span class="p">(</span><span class="s">"Transfer(address,address,uint256)"</span><span class="p">))</span>
+	<span class="n">transferType</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">abi</span><span class="o">.</span><span class="n">NewType</span><span class="p">(</span><span class="s">"tuple(address,address,uint256)"</span><span class="p">,</span> <span class="s">""</span><span class="p">,</span> <span class="no">nil</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span><span class="n">addressTracer</span><span class="p">)</span> <span class="n">OnLog</span><span class="p">(</span><span class="n">l</span> <span class="o">*</span><span class="n">types</span><span class="o">.</span><span class="n">Log</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">topic</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">l</span><span class="o">.</span><span class="n">Topics</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">topic</span> <span class="o">==</span> <span class="n">transferTopic</span> <span class="p">{</span>
+			<span class="n">unpacked</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="p">(</span><span class="n">abi</span><span class="o">.</span><span class="n">Arguments</span><span class="p">)</span><span class="o">.</span><span class="n">Unpack</span><span class="p">(</span><span class="n">l</span><span class="o">.</span><span class="n">Data</span><span class="p">[</span><span class="m">4</span><span class="o">:</span><span class="p">])</span>
+			<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="n">from</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">unpacked</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="o">.</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">)</span>
+			<span class="k">if</span> <span class="o">!</span><span class="n">ok</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="n">to</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">unpacked</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="o">.</span><span class="p">(</span><span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">)</span>
+			<span class="k">if</span> <span class="o">!</span><span class="n">ok</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="n">tokens</span><span class="p">,</span> <span class="n">ok</span> <span class="o">:=</span> <span class="n">unpacked</span><span class="p">[</span><span class="m">2</span><span class="p">]</span><span class="o">.</span><span class="p">(</span><span class="o">*</span><span class="n">big</span><span class="o">.</span><span class="n">Int</span><span class="p">)</span>
+			<span class="k">if</span> <span class="o">!</span><span class="n">ok</span> <span class="p">{</span>
+				<span class="k">continue</span>
+			<span class="p">}</span>
+			<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">addresses</span> <span class="p">{</span>
+				<span class="k">if</span> <span class="n">addr</span> <span class="o">==</span> <span class="n">from</span> <span class="o">||</span> <span class="n">addr</span> <span class="o">==</span> <span class="n">to</span> <span class="p">{</span>
+					<span class="n">t</span><span class="o">.</span><span class="n">writeRecord</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">l</span><span class="o">.</span><span class="n">Address</span><span class="o">.</span><span class="n">Hex</span><span class="p">(),</span> <span class="s">""</span><span class="p">,</span> <span class="n">tokens</span><span class="o">.</span><span class="n">String</span><span class="p">(),</span> <span class="s">"token transfer"</span><span class="p">)</span>
+					<span class="k">break</span>
+				<span class="p">}</span>
+			<span class="p">}</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span><span class="n">addressTracer</span><span class="p">)</span> <span class="n">OnStorageChange</span><span class="p">(</span><span class="n">a</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">prev</span><span class="p">,</span> <span class="nb">new</span> <span class="n">common</span><span class="o">.</span><span class="n">Hash</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">slot</span> <span class="o">:=</span> <span class="n">common</span><span class="o">.</span><span class="n">BytesToAddress</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">Bytes</span><span class="p">()[</span><span class="m">12</span><span class="o">:</span><span class="p">])</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">addr</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">t</span><span class="o">.</span><span class="n">addresses</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">addr</span> <span class="o">==</span> <span class="n">slot</span> <span class="p">{</span>
+			<span class="n">t</span><span class="o">.</span><span class="n">writeRecord</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">a</span><span class="o">.</span><span class="n">Hex</span><span class="p">(),</span> <span class="n">prev</span><span class="o">.</span><span class="n">String</span><span class="p">(),</span> <span class="nb">new</span><span class="o">.</span><span class="n">String</span><span class="p">(),</span> <span class="s">"token transfer"</span><span class="p">)</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="p">(</span><span class="n">t</span> <span class="o">*</span><span class="n">addressTracer</span><span class="p">)</span> <span class="n">writeRecord</span><span class="p">(</span><span class="n">addr</span> <span class="n">common</span><span class="o">.</span><span class="n">Address</span><span class="p">,</span> <span class="n">currency</span><span class="p">,</span> <span class="n">previous</span><span class="p">,</span> <span class="nb">new</span><span class="p">,</span> <span class="n">reason</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">t</span><span class="o">.</span><span class="n">writer</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="o">.</span><span class="n">Write</span><span class="p">([]</span><span class="kt">string</span><span class="p">{</span>
+		<span class="n">t</span><span class="o">.</span><span class="n">currentHash</span><span class="o">.</span><span class="n">Hex</span><span class="p">(),</span>
+		<span class="n">t</span><span class="o">.</span><span class="n">currentSender</span><span class="o">.</span><span class="n">Hex</span><span class="p">(),</span>
+		<span class="n">currency</span><span class="p">,</span>
+		<span class="n">previous</span><span class="p">,</span>
+		<span class="nb">new</span><span class="p">,</span>
+		<span class="n">reason</span><span class="p">,</span>
+	<span class="p">})</span>
+	<span class="n">t</span><span class="o">.</span><span class="n">writer</span><span class="p">[</span><span class="n">addr</span><span class="p">]</span><span class="o">.</span><span class="n">Flush</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

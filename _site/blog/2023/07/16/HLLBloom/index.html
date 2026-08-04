@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Building Bloom filters with HyperLogLog &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Discussion of my, ultimately futile, attempt to build a bloom filter based on HyperLogLog">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2023/07/16/HLLBloom/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Building Bloom filters with HyperLogLog">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2023/07/16/HLLBloom/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Building Bloom filters with HyperLogLog" />
+    <meta name="twitter:description" content="Discussion of my, ultimately futile, attempt to build a bloom filter based on HyperLogLog" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2023/07/16/HLLBloom/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Building Bloom filters with HyperLogLog</h1>
+  <span class="post-meta">Jul 16, 2023</span><br>
+  
+  <span class="post-meta small">
+  
+    6 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>I recently stumbled upon the HyperLogLog (HLL) algorithm, which is used to approximate the cardinality of a set.
+Afterwards I went to sleep and dreamt about using HLL to construct a bloom filter. The following day I had to implement my idea of a HLL-Bloom filter.
+This post will discuss the HyperLogLog algorithm, Bloom filters and my ultimately futile attempt to combine the two.</p>
+
+<h2 id="hyperloglog">HyperLogLog</h2>
+
+<p>The HyperLogLog (HLL) algorithm is used to approximate the number of distinct elements in a set. 
+It consists of three operations: <code class="language-plaintext highlighter-rouge">add</code> <code class="language-plaintext highlighter-rouge">count</code> and <code class="language-plaintext highlighter-rouge">merge</code>. The <code class="language-plaintext highlighter-rouge">merge</code> and <code class="language-plaintext highlighter-rouge">count</code> operations are not really applicable to our use case, so we will not discuss them in depth.
+The HyperLogLog element stores a set of <code class="language-plaintext highlighter-rouge">n</code> buckets. Each bucket contains an 8-bit counter.</p>
+
+<h4 id="add">Add</h4>
+<p>The <code class="language-plaintext highlighter-rouge">add</code> operation adds a new element <code class="language-plaintext highlighter-rouge">x</code> to the set.
+The element is hashed with a hashing algorithm <code class="language-plaintext highlighter-rouge">h = hash(x)</code>.
+We compute a bucket index <code class="language-plaintext highlighter-rouge">i</code> based on the first <code class="language-plaintext highlighter-rouge">log(n)</code> bytes of <code class="language-plaintext highlighter-rouge">h</code>. 
+Now we compute the number of trailing zeros of <code class="language-plaintext highlighter-rouge">trailingZeros = ctz(h)</code>.
+If the counter in the bucket is less than <code class="language-plaintext highlighter-rouge">trailingZeros</code>, we set the counter to <code class="language-plaintext highlighter-rouge">trailingZeros</code>: <code class="language-plaintext highlighter-rouge">buckets[i] = max(buckets[i], trailingZeros)</code>.
+Since we use a hash function with 256-bit output, an 8-bit counter is sufficient per bucket.</p>
+
+<h4 id="count">Count</h4>
+<p>The <code class="language-plaintext highlighter-rouge">count</code> operation approximates the number of distinct elements that have been added to the HLL.
+For this we compute the harmonic mean of all buckets: <code class="language-plaintext highlighter-rouge">count = harmonic_mean(buckets)</code>.</p>
+
+<h4 id="merge">Merge</h4>
+<p>The <code class="language-plaintext highlighter-rouge">merge</code> operation can be used to merge two (or more) HLLs together. The combined HLL approximates the number of distinct items in both sets.
+Each bucket of the resulting HLL contains the maximum of the buckets with the same index in the input HLLs: <code class="language-plaintext highlighter-rouge">buckets[i] = max(buckets_a[i], buckets_b[i])</code>.</p>
+
+<h2 id="bloom-filters">Bloom Filters</h2>
+
+<p>Bloom filters are a very interesting data structure that allows very quickly to allow us to verify if an element was <strong>not</strong> in a set. It does not allow us to verify if it was in a set though. The basic idea behind a bloom filter is that you have a bitset of a certain size. If you want to add an element you apply a number of hash functions to it and set the bits in the bitset according to the outputs. Now if you want to see if an element was included in the set, you need to hash it with the same hash functions and check if the bits in the bitset are set. If not all bits are set, you know that the element was not in the set. If all bits are set, you know that the element might or might not have been in the set (due to hash collisions).</p>
+
+<p>We use bloom filters in geth for example for the offline pruner. In the offline pruner we allocate a 2GB bitset and insert ~700.000.000 elements (the current state). Afterwards we can go through all stored trie nodes and check the bloom filter if they were included. If they are not included, we can delete them since they are not part of the current state anymore. This allows us to get rid of old state without having to look them up in the original 700 million data set.</p>
+
+<h2 id="building-a-filter-based-on-hll">Building a Filter based on HLL</h2>
+
+<p>In order to build a filter based on HLL, we need to define a fourth function <code class="language-plaintext highlighter-rouge">has</code> on the HLL.</p>
+
+<p><code class="language-plaintext highlighter-rouge">Has</code> returns false if the data was <em>definitely not</em> in the data set. It returns true if the data might or might not be in the dataset.
+We hash the element, compute the bucket index and the trailing zeros as described in <code class="language-plaintext highlighter-rouge">add</code>.
+Now we return true if <code class="language-plaintext highlighter-rouge">trailingZeros &lt; buckets[i]</code>, otherwise we return false.</p>
+
+<p>We can quickly see that if <code class="language-plaintext highlighter-rouge">has</code> returns false, the data was <em>definitely not</em> in the set.</p>
+
+<h2 id="evaluation">Evaluation</h2>
+
+<p>We can quite intuitively deduce that the error of the HLL based scheme is quite large. 
+This is mainly because the CountTrailingZeros(CTZ) operation reduces the entropy of the data quite significantly.
+If we only have one bucket, we would reduce the entropy from 32 bytes (output of the hash function) to 1 byte (log2(256 bit)).
+The more buckets we have, the less we reduce the entropy, since the index for the bucket is chosen by the most significant log(bucket) bits.</p>
+
+<p>The following graphic shows the number of false positives when inserting ‘2^x+1<code class="language-plaintext highlighter-rouge"> elements into a filter of size </code>2^x`.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/HLL_Bloom_1.png" alt="HLL vs Bloom, 2^x+1 elements in 2^x filter" /></p>
+
+<p>Interestingly, when we chart the error on a logarithmic axis, the following relationship shows.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/HLL_Bloom_1_Log.png" alt="HLL vs Bloom, 2^x+1 elements in 2^x filter, logarithmic axis" /></p>
+
+<p>Thus we can deduce that while the error is significantly bigger with HLL than with the Bloom filter, the rate of growth does not accelerate with the size of the filter as long as the number of elements grows accordingly.</p>
+
+<p>The next question that arises is whether how the error behaves with fuller filters. For this we rerun the experiment with filters of size <code class="language-plaintext highlighter-rouge">2^x</code> and start inserting <code class="language-plaintext highlighter-rouge">2^(x+i)</code> elements with <code class="language-plaintext highlighter-rouge">i = (0, 10]</code>.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/HLL_Bloom_all.png" alt="HLL vs Bloom, 2^(x+i) elements in 2^x filter, logarithmic axis" /></p>
+
+<p>We can see that the difference between the error rates between the Bloom and HLL filter decreases significantly the more elements are inserted. After <code class="language-plaintext highlighter-rouge">2^(x+7)</code> elements inserted into a filter of size <code class="language-plaintext highlighter-rouge">2^x</code>, the HLL filter starts to have a lower error rate than the Bloom filter. These are very contrived examples though, since the idea is to size the bloom filter s.th. the error rate stays very low. At the point of reversal, the error rate for the HLL filter is at 96.35% while the bloom filter shows an error rate of 96.75%. As a reference, the size of the bloom filter we use in go-ethereum’s state pruner is chosen to have an error rate of 0.03%.</p>
+
+<h3 id="benchmarks">Benchmarks</h3>
+<p>Now that we established that the HLL filter is significantly worse than the Bloom filter, we should take a quick look at performance to find at least one redeeming feature of the HLL filter.
+The following benchmarks try to insert elements into filters of size 2048. The bloom filter uses 4 hash functions.
+We can conclude that the HLL filter is twice as quick as the Bloom filter.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BenchmarkHll-8   	17189948	        69.25 ns/op	      64 B/op	       2 allocs/op
+BenchmarkBloom-8   	 8753673	       135.8 ns/op	      64 B/op	       2 allocs/op
+</code></pre></div></div>
+
+<h2 id="conclusion">Conclusion</h2>
+<p>In conclusion we can say that the HLL filter looses significantly on efficiency against the Bloom filter.
+While it is twice as fast as the Bloom filter, the results are significantly worse. 
+Only in a case where significantly more elements than slots in the filter are added, the HLL filter has a slight edge, since it is very hard to fill up all buckets to the top.</p>
+
+<p>All in all this was a useless experiment, but a fun one at that.</p>
+
+<p>The only real bright spot is that this experiment resulted in a very simple HyperLogLog library in golang, which can be found here: https://github.com/MariusVanDerWijden/go-hll. Its not production ready yet, but it can be used to quickly understand the HyperLogLog algorithm.</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

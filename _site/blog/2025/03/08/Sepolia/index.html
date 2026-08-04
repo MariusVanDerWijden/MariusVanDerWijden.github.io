@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Sepolia Pectra fork incident recap &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="The Sepolia network had a few hiccups during the upgrade to Pectra. This post tells the story of how we managed to coordinate an upgrade and how we defended against an unknown adversary.">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2025/03/08/Sepolia/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Sepolia Pectra fork incident recap">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2025/03/08/Sepolia/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Sepolia Pectra fork incident recap" />
+    <meta name="twitter:description" content="The Sepolia network had a few hiccups during the upgrade to Pectra. This post tells the story of how we managed to coordinate an upgrade and how we defended against an unknown adversary." />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2025/03/08/Sepolia/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Sepolia Pectra fork incident recap</h1>
+  <span class="post-meta">Mar 8, 2025</span><br>
+  
+  <span class="post-meta small">
+  
+    4 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>The Sepolia hardfork was scheduled to go live on March 5th at 7:30 UTC.
+Shortly after the hardfork was activated we told Jim McDonald to send a deposit to test the execution triggered withdrawal functionality added in Pectra. Shortly after, we saw error messages on our geth node and started seeing a lot of empty blocks being mined.</p>
+
+<p>The error message said “unable to parse deposit data: deposit wrong length: want 576, have 32”. The only explanation for this error message was, that the deposit contract emitted some event that was not the expected <code class="language-plaintext highlighter-rouge">Deposited</code> event that we were looking for.
+We quickly realized that, because the deposit contract is token gated, an ERC-20 <code class="language-plaintext highlighter-rouge">transfer</code> event was emitted whenever a deposit was processed.</p>
+
+<p>The logic in EIP-6110 demanded that all logs from the deposit contract would be processed in the same way and the client should error out, if the emitted event was incorrect. All clients followed this behavior. However because of this, the produced block would be invalidated. Therefore the nodes would only produce empty blocks, because as soon as they included the transaction to the deposit contract, the block production would produce an error.</p>
+
+<p>Felix from the go-ethereum team came up with the following fix, which ignores all erroneous logs coming from the deposit contract:</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/sepolia-proper-fix.png" alt="Proper Fix" /></p>
+
+<p>The problem now was to coordinate the rollout. We knew that if we rolled this fix out in an uncoordinated fashion, the chain would split, since the un-updated nodes would not be able to sync the new chain. So we decided at roughly 10:30 UTC to do a coordinated rollout at 14 UTC. This gave teams the necessary time to cut releases and to get their machines ready for the update.</p>
+
+<p>These three and a half hours were a pretty long time during which Sepolia would only produce empty blocks. So we decided to remove the transactions that were continuously triggering this edge case by replacing them. This was possible, because we knew that only Jim and Paritosh from the EthPandaOps team send transactions to the contract. Those transactions were replaced by higher paying ones, so the edge case was not triggered anymore and we started seeing full blocks again.</p>
+
+<p>We checked the deposit contract and verified that no one could trigger the deposit functionality (because it is token gated and we only gave out tokens to trusted parties for Sepolia). We missed one edge case in the ERC20 spec though.</p>
+
+<p>After a few minutes we saw a lot of empty blocks again, so we looked again into the transaction pools and found another offending transaction that triggered the same edge cases. First we thought that someone from the trusted validators has made a mistake, but we quickly realized that this transaction originated from a new account recently funded by the faucet. 
+Someone found the edge case in the ERC20 contract that we missed.</p>
+
+<p>The ERC20 standard does not forbid 0 token transfer, this allows anyone (even if they don’t own any token) to transfer 0 tokens to another address which will emit an event. The “attacker” realized this edge case that we missed and sent a transaction that triggered the behavior again.</p>
+
+<p>The only way to stop the attack would be to filter out all transactions that interact with the deposit contract. So we made the following private fix which we deployed to a few of the devops nodes. We suspected that the attacker was reading some of our chats, so we decided not to publicize the fix, but only update a few nodes that we controlled in order to get more full blocks on the network.</p>
+
+<p><img src="https://raw.githubusercontent.com/MariusVanDerWijden/mariusvanderwijden.github.io/master/_posts/sepolia-private-fix.png" alt="Private Fix" /></p>
+
+<p>The fix is only filtering out transactions that directly call the deposit contract. If we publicized the fix, the attacker would’ve been able to circumvent our mitigation by calling the contract from another contract. These internal calls would still trigger the event, but they wouldn’t be easy to filter out during block creation.</p>
+
+<p>Once we updated all ef_devops nodes (which are roughly 10% of the network) they started proposing full blocks again. Doing so allowed users to still use the chain until we deployed the real fix in a coordinated fashion.</p>
+
+<p>At 14:00 UTC all nodes updated to the new releases which contained the real fix. A few blocks later the attackers transaction was mined successfully which proved that all node operators had successfully updated. We never lost finalization during the incident and as previously said, the issue only happened on Sepolia, because we’re using a token gated deposit contract instead of the normal mainnet deposit contract.</p>
+
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>

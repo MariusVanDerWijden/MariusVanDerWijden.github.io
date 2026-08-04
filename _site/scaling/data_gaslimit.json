@@ -1,0 +1,64 @@
+{
+  "lastUpdated": "2025-01-15",
+  "blobData": [
+    {
+      "date": "2021-08-01",
+      "upgrade-name": "Gas Limit Update 1",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 10
+    },
+    {
+      "date": "2025-01-01",
+      "upgrade-name": "Gas Limit Update 2",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 10
+    },
+    {
+      "date": "2025-02-01",
+      "upgrade-name": "Gas Limit Update 3",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 12
+    },
+    {
+      "date": "2025-07-20",
+      "upgrade-name": "Gas Limit Update 4",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 15
+    },
+    {
+      "date": "2025-11-01",
+      "upgrade-name": "Gas Limit Update 5",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 20
+    },
+    {
+      "date": "2026-06-01",
+      "upgrade-name": "Gas Limit Update 6",
+      "executionTime": 3,
+      "parallelism": 1,
+      "mgas": 40,
+      "projected": true
+    },
+    {
+      "date": "2026-12-01",
+      "upgrade-name": "Gas Limit Update 7",
+      "executionTime": 3,
+      "parallelism": 3,
+      "mgas": 40,
+      "projected": true
+    },
+    {
+      "date": "2027-03-01",
+      "upgrade-name": "Gas Limit Update 8",
+      "executionTime": 5,
+      "parallelism": 3,
+      "mgas": 60,
+      "projected": true
+    }
+  ]
+}

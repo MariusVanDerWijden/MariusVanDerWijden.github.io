@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Ethereum's biggest issue no one's talking about &#8211; MariusVanDerWijden</title>
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="dns-prefetch" href="//maxcdn.bootstrapcdn.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Private orderflow and MEV is a deadly combination, but trustless light clients might be able solve it">
+    <link rel="manifest" type="application/manifest+json; charset=utf-8" href="/manifest.json" />
+    <meta name="robots" content="all">
+    <meta name="author" content="Marius van der Wijden">
+    
+    <meta name="keywords" content="blog">
+    <link rel="canonical" href="https://mariusvanderwijden.github.io//blog/2022/10/21/lightclients/">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed for MariusVanDerWijden" href="/feed.xml" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/pixyll.css?202608041553" type="text/css">
+
+    <!-- Fonts -->
+    
+    <link href='//fonts.googleapis.com/css?family=Merriweather:900,900italic,300,300italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Lato:900,300' rel='stylesheet' type='text/css'>
+    
+    
+
+    <!-- MathJax -->
+    
+
+    <!-- Verifications -->
+    
+    
+
+    <!-- Open Graph -->
+    <!-- From: https://github.com/mmistakes/hpstr-jekyll-theme/blob/master/_includes/head.html -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Ethereum&apos;s biggest issue no one&apos;s talking about">
+    <meta property="og:description" content="Blog on semi-cool ethereum stuff">
+    <meta property="og:url" content="https://mariusvanderwijden.github.io//blog/2022/10/21/lightclients/">
+    <meta property="og:site_name" content="MariusVanDerWijden">
+    
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    
+    <meta name="twitter:title" content="Ethereum's biggest issue no one's talking about" />
+    <meta name="twitter:description" content="Private orderflow and MEV is a deadly combination, but trustless light clients might be able solve it" />
+    <meta name="twitter:url" content="https://mariusvanderwijden.github.io//blog/2022/10/21/lightclients/" />
+    
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="/favicon-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+    <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+    <link rel="shortcut icon" href="/favicon.ico">
+
+    
+</head>
+
+<body class="site">
+  
+	
+
+  <div class="site-wrap">
+    <header class="site-header px2 px-responsive">
+  <div class="mt2 wrap">
+    <div class="measure">
+      <a href="/" class="site-title">MariusVanDerWijden</a>
+      <nav class="site-nav">
+        
+
+
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+    
+    
+    
+    
+
+    
+
+
+      </nav>
+      <div class="clearfix"></div>
+      
+    </div>
+  </div>
+</header>
+
+
+    <div class="post p2 p-responsive wrap" role="main">
+      <div class="measure">
+        
+
+
+<div class="post-header mb2">
+  <h1>Ethereum's biggest issue no one's talking about</h1>
+  <span class="post-meta">Oct 21, 2022</span><br>
+  
+  <span class="post-meta small">
+  
+    4 minute read
+  
+  </span>
+</div>
+
+<article class="post-content">
+  <p>We recently had a long workshop in Bogota with the Flashbots team and other Relay runners.
+Afterwards I started thinking a bit about how to get rid of Flashbots and democratize MEV even further.
+One initial idea I had was to create a geth fork that could run a bunch of basic MEV strategies (like arbitrage, liquidations, etc).
+All the strategies would be open source under a very strict license s.th. interested developers could add their strategies and no one (at least no big companies) is able to modify the code and <em>not</em> upstream their contributions.
+This would bring back power to the validators.</p>
+
+<p>A single liquidation can bring a validator &gt; 100 ETH. 
+All of this value is currently extracted by block builders and they only have to pay just enough to get their transactions into a block.
+This value is also not reinvested in the ecosystem. 
+Tokens are dumped and ETH is (usually) sold.
+If this value would go to the validators, they would (likely) reinvest it into validators, making Ethereum more secure.</p>
+
+<p>So far so good, but why are we not doing this then?
+This is where we arrive at the crux of the problem; <strong>private orderflow</strong>.
+If we moved the block production back to the individual validators, the public mempool would start to matter more.
+In order to find the arbitrage and liquidation opportunities, the validators would need to see those transactions.
+However, most transactions are currently send via public RPC endpoints. 
+Thus a handfull of centralized services have control over the orderflow. 
+They essentially choose which nodes to supply these transactions to.</p>
+
+<p>In a world where block building is done by the validators, access to the private orderflow becomes crucial.
+Therefore big staking pools might start to make deals with RPC providers to get access to the orderflow.
+This is bad and will result in centralization around the RPC providers as he who controls the transactions also controls the MEV.</p>
+
+<p>TBH. private orderflow is also a problem right now with centralized block builders.
+The builders that get access to the most transactions can extract the most MEV so they can pay more for transactions etc.
+But there might be a solution.</p>
+
+<p>Trustless light clients are not very feasible on Ethereum right now.
+They would require merkle proofs for all state changes in a block which can easily result in &gt; 500MB of proof data for a single block.
+The move from merkle trees to verkle trees will enable two things.
+Light clients will be able to <strong>trustlessly</strong> follow the chain by downloading the headers and a proof for the transactions in the block.
+But light clients will also be able to <strong>trustlessly</strong> execute <code class="language-plaintext highlighter-rouge">eth_call</code> by asking full nodes (or centralized providers) for certain parts of the state (and proofs for it). 
+Thus light clients will be able to create transactions and estimate their gas usage for example.</p>
+
+<p>How does this relate to private orderflow?
+Given a strong and easy to use implementation of trustless light clients, we might see wallets moving away from defaulting to centralized RPC providers to running their own light clients in the background.
+Having an army of hundred thousands of light clients running on users computers (and maybe mobile phones) everywhere will make it way more difficult to capture the orderflow.</p>
+
+<p>However, there are some more drawbacks to providing a geth fork that extracts the MEV directly for the validator other than private orderflow.
+Currently validators that don’t use mev-boost use a priority gas auction to maximize their profit. 
+Transactions are ordered by gas price. 
+If the majority of validators extract MEV, it might impact the execution times of user transactions since high paying transactions are only considered if they pay more than the MEV that can be extracted from other transactions.
+This might negatively impact the UX of transactions sending plain ether, which usually have very little MEV attached.</p>
+
+<p>Another issue to consider is that ethereum slowly moves to proposer-builder separation (PBS).
+The idea of PBS is to split the validator and block producer role to make running a validator cheaper and easier.
+Since we <em>pay</em> validators to verify and produce blocks, I personally think it is reasonable to require them to do block production.
+But there’s a discussion to be had, because increased state and history growth will lead to higher node requirements.
+Higher node requirements might lead to less homestakers and more people moving to staking pools since running a node becomes harder.</p>
+
+<p>In conclusion private orderflow is bad, because whomever controls the transactions can extract the most MEV and thus becomes a central player.
+We can fight private orderflow by sending more transactions directly to the public mempool by running our own nodes.
+If trustless light clients become usable and economic we will hopefully see wallets move away from centralized RPC providers.
+In order to enable trustless light clients we need verkle trees and a lot of engineering work.</p>
+
+<p>Big thanks to @lightclients for his feedback on this block post!</p>
+
+</article>
+
+
+
+
+
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <footer class="center">
+  <div class="measure">
+    <small>
+      Theme crafted with &lt;3 by <a href="http://johnotander.com">John Otander</a> (<a href="https://twitter.com/4lpine">@4lpine</a>).<br>
+      &lt;/&gt; available on <a href="https://github.com/johnotander/pixyll">GitHub</a>.
+    </small>
+  </div>
+</footer>
+
+<script type="text/javascript">
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js")
+    }
+</script>
+
+</body>
+</html>
